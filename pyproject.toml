@@ -1,0 +1,63 @@
+[project]
+name = "pyarr-manager"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "homeassistant>=2026.2.3",
+    "pyarr>=6.3.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3.4",
+    "pytest-homeassistant-custom-component>=0.13.204",
+    "pytest-asyncio>=0.25.3",
+    "pytest-cov>=6.0.0",
+    "pre-commit>=4.1.0",
+    "ruff>=0.9.6",
+    "mypy>=1.15.0",
+    "interrogate>=1.7.0",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+norecursedirs = [".git", ".venv"]
+asyncio_mode = "auto"
+addopts = "--cov=custom_components.armadarr --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.14"
+show_error_codes = true
+ignore_missing_imports = true
+strict = true
+warn_unreachable = true
+warn_unused_configs = true
+files = ["custom_components/armadarr", "tests"]
+
+[tool.codespell]
+ignore-words-list = "hass"
+skip = "*.json,*.lock"
+
+[tool.interrogate]
+ignore-init-method = true
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-property-decorators = false
+ignore-module = false
+ignore-nested-functions = false
+ignore-nested-classes = true
+ignore-setters = false
+fail-under = 95
+exclude = ["setup.py", "docs", "build"]
+ignore-regex = ["^async_setup", "^async_setup_entry", "^async_unload_entry", "^async_reload_entry"]
+verbose = 0
+quiet = false
+whitelist-regex = []
+color = true
+omit-covered-files = false
+generate-badge = "."
+badge-format = "svg"

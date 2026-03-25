@@ -1,0 +1,328 @@
+system_task:
+  name: System Task
+  description: Execute a system task on the Arr application.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    task:
+      name: Task Name
+      description: The name of the task to execute (e.g., RssSync, Backup).
+      required: true
+      selector:
+        text:
+
+search_missing:
+  name: Search Missing
+  description: Trigger a search for missing items.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+
+add_series:
+  name: Add Series
+  description: Add a new series to Sonarr.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    title:
+      name: Title
+      description: The title of the series to search for if TVDB ID is not provided.
+      required: false
+      selector:
+        text:
+    tvdb_id:
+      name: TVDB ID
+      description: The TVDB ID of the series.
+      required: false
+      selector:
+        number:
+          mode: box
+    quality_profile_id:
+      name: Quality Profile ID
+      description: The ID of the quality profile to use.
+      required: true
+      selector:
+        number:
+          mode: box
+    root_folder_path:
+      name: Root Folder Path
+      description: The path to the root folder where the series will be saved.
+      required: true
+      selector:
+        text:
+
+add_movie:
+  name: Add Movie
+  description: Add a new movie to Radarr.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    title:
+      name: Title
+      description: The title of the movie to search for if TMDB ID is not provided.
+      required: false
+      selector:
+        text:
+    tmdb_id:
+      name: TMDB ID
+      description: The TMDB ID of the movie.
+      required: false
+      selector:
+        number:
+          mode: box
+    quality_profile_id:
+      name: Quality Profile ID
+      description: The ID of the quality profile to use.
+      required: true
+      selector:
+        number:
+          mode: box
+    root_folder_path:
+      name: Root Folder Path
+      description: The path to the root folder where the movie will be saved.
+      required: true
+      selector:
+        text:
+
+lookup_series:
+  name: Lookup Series
+  description: Search for a series on TheTVDB.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    term:
+      name: Search Term
+      description: The title or TVDB ID (tvdb:123) to search for.
+      required: true
+      selector:
+        text:
+
+lookup_movie:
+  name: Lookup Movie
+  description: Search for a movie on TMDB.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    term:
+      name: Search Term
+      description: The title or TMDB ID (tmdb:123) to search for.
+      required: true
+      selector:
+        text:
+
+add_artist:
+  name: Add Artist
+  description: Add a new artist to Lidarr.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    name:
+      name: Name
+      description: The name of the artist to search for if MusicBrainz ID is not provided.
+      required: false
+      selector:
+        text:
+    mb_id:
+      name: MusicBrainz ID
+      description: The MusicBrainz ID of the artist.
+      required: false
+      selector:
+        text:
+    quality_profile_id:
+      name: Quality Profile ID
+      description: The ID of the quality profile to use.
+      required: true
+      selector:
+        number:
+          mode: box
+    metadata_profile_id:
+      name: Metadata Profile ID
+      description: The ID of the metadata profile to use.
+      required: true
+      selector:
+        number:
+          mode: box
+    root_folder_path:
+      name: Root Folder Path
+      description: The path to the root folder where the artist will be saved.
+      required: true
+      selector:
+        text:
+
+lookup_artist:
+  name: Lookup Artist
+  description: Search for an artist on MusicBrainz.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    term:
+      name: Search Term
+      description: The name or MusicBrainz ID (lidarr:123) to search for.
+      required: true
+      selector:
+        text:
+
+add_author:
+  name: Add Author
+  description: Add a new author to Readarr.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    name:
+      name: Name
+      description: The name of the author to search for if ID is not provided.
+      required: false
+      selector:
+        text:
+    author_id:
+      name: Author ID
+      description: The ID of the author.
+      required: false
+      selector:
+        text:
+    quality_profile_id:
+      name: Quality Profile ID
+      description: The ID of the quality profile to use.
+      required: true
+      selector:
+        number:
+          mode: box
+    metadata_profile_id:
+      name: Metadata Profile ID
+      description: The ID of the metadata profile to use.
+      required: true
+      selector:
+        number:
+          mode: box
+    root_folder_path:
+      name: Root Folder Path
+      description: The path to the root folder where the author will be saved.
+      required: true
+      selector:
+        text:
+
+lookup_author:
+  name: Lookup Author
+  description: Search for an author on Readarr.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    term:
+      name: Search Term
+      description: The name of the author to search for.
+      required: true
+      selector:
+        text:
+
+list_upcoming_media:
+  name: List Upcoming Media
+  description: Retrieve upcoming media (episodes, movies, etc.) with rich metadata like posters and fanart.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    days:
+      name: Days
+      description: Number of days to look ahead for upcoming media.
+      required: false
+      default: 30
+      selector:
+        number:
+          min: 1
+          max: 365
+          mode: box
+
+list_wanted_media:
+  name: List Wanted Media
+  description: Retrieve missing/wanted media (episodes, movies, etc.) with rich metadata like posters and fanart.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    page_size:
+      name: Page Size
+      description: Number of items to retrieve.
+      required: false
+      default: 50
+      selector:
+        number:
+          min: 1
+          max: 1000
+          mode: box
+
+delete_queue_item:
+  name: Delete Queue Item
+  description: Remove an item from the download queue.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    item_id:
+      name: Item ID
+      description: The ID of the queue item to delete.
+      required: true
+      selector:
+        number:
+          mode: box

@@ -1,4 +1,4 @@
-name: Lint
+name: Tests
 
 on:
   push:
@@ -11,8 +11,8 @@ on:
 permissions: {}
 
 jobs:
-  pre-commit:
-    name: "Pre-commit"
+  pytest:
+    name: "Pytest"
     runs-on: "ubuntu-latest"
     steps:
       - name: Checkout the repository
@@ -26,5 +26,8 @@ jobs:
       - name: Set up Python
         run: uv python install 3.14
 
-      - name: Run pre-commit
-        uses: pre-commit/action@2c7b3805fd2a0fd8c1884dcaeeef3a58ff2d7237 # v3.0.1
+      - name: Install dependencies
+        run: uv sync --all-groups
+
+      - name: Run tests
+        run: uv run pytest tests

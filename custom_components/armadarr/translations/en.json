@@ -2,15 +2,17 @@
     "config": {
         "step": {
             "user": {
-                "description": "If you need help with the configuration have a look here: {documentation_url}",
+                "description": "Configure Armadarr to connect to your *Arr application.",
                 "data": {
-                    "username": "Username",
-                    "password": "Password"
+                    "app_type": "App Type",
+                    "url": "URL",
+                    "api_key": "API Key",
+                    "verify_ssl": "Verify SSL"
                 }
             }
         },
         "error": {
-            "auth": "Username/Password is wrong.",
+            "auth": "Invalid API Key.",
             "connection": "Unable to connect to the server.",
             "unknown": "Unknown error occurred."
         },

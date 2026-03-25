@@ -1,0 +1,14 @@
+{
+  "packages": {
+    ".": {
+      "release-type": "python",
+      "extra-files": [
+        {
+          "type": "json",
+          "path": "custom_components/armadarr/manifest.json",
+          "jsonpath": "$.version"
+        }
+      ]
+    }
+  }
+}
