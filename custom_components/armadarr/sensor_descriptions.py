@@ -115,6 +115,20 @@ def get_media_sensors() -> list[ArmadarrSensorEntityDescription]:
             state_class=SensorStateClass.MEASUREMENT,
             value_fn=lambda data: int(data.get("unmonitored_count", 0)) if data else 0,
         ),
+        ArmadarrSensorEntityDescription(
+            key="upcoming_media",
+            name="Upcoming Media",
+            icon="mdi:calendar-star",
+            state_class=SensorStateClass.MEASUREMENT,
+            value_fn=lambda data: len(data.get("calendar", [])) if data else 0,
+        ),
+        ArmadarrSensorEntityDescription(
+            key="wanted_media",
+            name="Wanted Media",
+            icon="mdi:magnify-plus-outline",
+            state_class=SensorStateClass.MEASUREMENT,
+            value_fn=lambda data: len(data.get("wanted", [])) if data else 0,
+        ),
     ]
 
 

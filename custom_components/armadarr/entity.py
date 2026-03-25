@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from homeassistant.helpers.device_registry import DeviceEntryType, DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -43,3 +43,11 @@ class ArmadarrEntity(CoordinatorEntity[StandardCoordinator | DailyCoordinator]):
             manufacturer="PyArr",
             entry_type=DeviceEntryType.SERVICE,
         )
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the state attributes."""
+        return {
+            "entry_id": self.config_entry.entry_id,
+            "app_type": self.config_entry.data["app_type"],
+        }

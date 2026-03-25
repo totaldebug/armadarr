@@ -7,7 +7,16 @@
                     "app_type": "App Type",
                     "url": "URL",
                     "api_key": "API Key",
-                    "verify_ssl": "Verify SSL"
+                    "verify_ssl": "Verify SSL",
+                    "upcoming_days": "Upcoming Days",
+                    "wanted_count": "Wanted Count"
+                }
+            },
+            "init": {
+                "description": "Configure media limits. High values may increase database size.",
+                "data": {
+                    "upcoming_days": "Upcoming Days",
+                    "wanted_count": "Wanted Count"
                 }
             }
         },

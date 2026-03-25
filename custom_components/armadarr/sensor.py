@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Any
 from homeassistant.components.sensor import SensorEntity
 
 from .entity import ArmadarrEntity
+from .parsers import parse_event
 from .sensor_descriptions import (
     ArmadarrSensorEntityDescription,
     get_app_specific_sensors,
@@ -49,12 +50,15 @@ async def async_setup_entry(
             for description in get_disk_space_sensors(root_folders)
         )
 
-    # App-Specific Sensors (Daily Coordinator)
+    # App-Specific Sensors
     if app_type in ["Sonarr", "Whisparr", "Radarr", "Lidarr", "Readarr"]:
-        entities.extend(
-            ArmadarrSensor(daily_coordinator, description)
-            for description in get_media_sensors()
-        )
+        for description in get_media_sensors():
+            coordinator = (
+                standard_coordinator
+                if description.key == "upcoming_media"
+                else daily_coordinator
+            )
+            entities.append(ArmadarrSensor(coordinator, description))
 
     for description in get_app_specific_sensors(app_type):
         # Prowlarr indexer_errors uses standard_coordinator, others use daily
@@ -86,3 +90,42 @@ class ArmadarrSensor(ArmadarrEntity, SensorEntity):
         """Return the native value of the sensor."""
         # Use self.coordinator.data directly
         return self.entity_description.value_fn(self.coordinator.data)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the state attributes."""
+        attrs = {
+            "entry_id": self.config_entry.entry_id,
+            "app_type": self.config_entry.data["app_type"],
+        }
+
+        if self.entity_description.key in ["upcoming_media", "wanted_media"]:
+            data_key = (
+                "calendar"
+                if self.entity_description.key == "upcoming_media"
+                else "wanted"
+            )
+            raw_data = self.coordinator.data.get(data_key, [])
+            app_type = self.config_entry.data["app_type"]
+            base_url = self.config_entry.data["url"].rstrip("/")
+            api_key = self.config_entry.data["api_key"]
+
+            items = []
+            for event in raw_data:
+                item = parse_event(event, app_type)
+                if not item:
+                    continue
+
+                # Ensure URLs are absolute if they are relative
+                if item.get("poster") and item["poster"].startswith("/"):
+                    sep = "&" if "?" in item["poster"] else "?"
+                    item["poster"] = f"{base_url}{item['poster']}{sep}apikey={api_key}"
+                if item.get("fanart") and item["fanart"].startswith("/"):
+                    sep = "&" if "?" in item["fanart"] else "?"
+                    item["fanart"] = f"{base_url}{item['fanart']}{sep}apikey={api_key}"
+
+                items.append(item)
+
+            attrs["data"] = items
+
+        return attrs

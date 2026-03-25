@@ -6,6 +6,7 @@ from typing import Any
 
 import voluptuous as vol
 from homeassistant import config_entries
+from homeassistant.core import callback
 from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from pyarr import (
@@ -22,8 +23,12 @@ from .const import (
     APP_TYPES,
     CONF_API_KEY,
     CONF_APP_TYPE,
+    CONF_UPCOMING_DAYS,
     CONF_URL,
     CONF_VERIFY_SSL,
+    CONF_WANTED_COUNT,
+    DEFAULT_UPCOMING_DAYS,
+    DEFAULT_WANTED_COUNT,
     DOMAIN,
     LOGGER,
 )
@@ -84,10 +89,32 @@ class ArmadarrFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(
                         CONF_VERIFY_SSL, default=True
                     ): selector.BooleanSelector(),
+                    vol.Optional(
+                        CONF_UPCOMING_DAYS, default=DEFAULT_UPCOMING_DAYS
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=1, max=365, mode=selector.NumberSelectorMode.BOX
+                        )
+                    ),
+                    vol.Optional(
+                        CONF_WANTED_COUNT, default=DEFAULT_WANTED_COUNT
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=1, max=500, mode=selector.NumberSelectorMode.BOX
+                        )
+                    ),
                 },
             ),
             errors=_errors,
         )
+
+    @staticmethod
+    @callback
+    def async_get_options_flow(
+        config_entry: config_entries.ConfigEntry,
+    ) -> ArmadarrOptionsFlowHandler:
+        """Get the options flow for this handler."""
+        return ArmadarrOptionsFlowHandler()
 
     async def _test_connection(
         self,
@@ -134,3 +161,48 @@ class ArmadarrFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
 
         # Test connection by getting system status
         await client.system.get_status()
+
+
+class ArmadarrOptionsFlowHandler(config_entries.OptionsFlow):
+    """Handle Armadarr options."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> config_entries.ConfigFlowResult:
+        """Manage the options."""
+        if user_input is not None:
+            return self.async_create_entry(title="", data=user_input)
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Optional(
+                        CONF_UPCOMING_DAYS,
+                        default=self.config_entry.options.get(
+                            CONF_UPCOMING_DAYS,
+                            self.config_entry.data.get(
+                                CONF_UPCOMING_DAYS, DEFAULT_UPCOMING_DAYS
+                            ),
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=1, max=365, mode=selector.NumberSelectorMode.BOX
+                        )
+                    ),
+                    vol.Optional(
+                        CONF_WANTED_COUNT,
+                        default=self.config_entry.options.get(
+                            CONF_WANTED_COUNT,
+                            self.config_entry.data.get(
+                                CONF_WANTED_COUNT, DEFAULT_WANTED_COUNT
+                            ),
+                        ),
+                    ): selector.NumberSelector(
+                        selector.NumberSelectorConfig(
+                            min=1, max=500, mode=selector.NumberSelectorMode.BOX
+                        )
+                    ),
+                }
+            ),
+        )

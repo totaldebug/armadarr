@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
-from .parsers import parse_event
+from ..parsers import parse_event
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant, ServiceCall
@@ -262,13 +262,11 @@ async def async_handle_lookup_author(
     return {"data": results}
 
 
-async def async_handle_list_upcoming_media(
+async def async_handle_get_config_data(
     hass: HomeAssistant, call: ServiceCall
 ) -> dict[str, Any]:
-    """Handle list upcoming media service call."""
+    """Handle get config data service call."""
     entry_id = call.data["entry_id"]
-    days = call.data.get("days", 30)
-
     entry = hass.config_entries.async_get_entry(entry_id)
     if not entry:
         msg = f"Entry {entry_id} not found"
@@ -277,115 +275,15 @@ async def async_handle_list_upcoming_media(
     client = entry.runtime_data.client
     app_type = entry.data["app_type"]
 
-    start = datetime.now(tz=UTC)
-    end = start + timedelta(days=days)
+    data: dict[str, Any] = {}
+    if app_type not in ["Bazarr", "Prowlarr"]:
+        data["root_folders"] = await client.root_folder.get()
+        data["quality_profiles"] = await client.quality_profile.get()
 
-    # Build request parameters to include full resource details
-    params: dict[str, Any] = {
-        "start": start.strftime("%Y-%m-%d"),
-        "end": end.strftime("%Y-%m-%d"),
-        "unmonitored": "true",
-    }
+    if app_type in ["Lidarr", "Readarr"]:
+        data["metadata_profiles"] = await client.metadata_profile.get()
 
-    if app_type in ["Sonarr", "Whisparr"]:
-        params["includeSeries"] = "true"
-    elif app_type == "Radarr":
-        params["includeMovie"] = "true"
-    elif app_type == "Lidarr":
-        params["includeArtist"] = "true"
-    elif app_type == "Readarr":
-        params["includeAuthor"] = "true"
-
-    # Use http_utils.request directly to pass extra parameters
-    # not supported by calendar.get()
-    raw_events = await client.http_utils.request("calendar", params=params)
-
-    if not isinstance(raw_events, list):
-        return {"data": []}
-
-    events = []
-    for event in raw_events:
-        item = parse_event(event, app_type)
-        if not item:
-            continue
-
-        # Ensure URLs are absolute if they are relative
-        base_url = entry.data["url"].rstrip("/")
-        api_key = entry.data["api_key"]
-
-        if item.get("poster") and item["poster"].startswith("/"):
-            sep = "&" if "?" in item["poster"] else "?"
-            item["poster"] = f"{base_url}{item['poster']}{sep}apikey={api_key}"
-        if item.get("fanart") and item["fanart"].startswith("/"):
-            sep = "&" if "?" in item["fanart"] else "?"
-            item["fanart"] = f"{base_url}{item['fanart']}{sep}apikey={api_key}"
-
-        events.append(item)
-
-    return {"data": events}
-
-
-async def async_handle_list_wanted_media(
-    hass: HomeAssistant, call: ServiceCall
-) -> dict[str, Any]:
-    """Handle list wanted media service call."""
-    entry_id = call.data["entry_id"]
-    page_size = call.data.get("page_size", 50)
-
-    entry = hass.config_entries.async_get_entry(entry_id)
-    if not entry:
-        msg = f"Entry {entry_id} not found"
-        raise ArmadarrServiceError(msg)
-
-    client = entry.runtime_data.client
-    app_type = entry.data["app_type"]
-
-    # Build request parameters
-    params: dict[str, Any] = {
-        "page": 1,
-        "pageSize": page_size,
-        "sortKey": "airDateUtc"
-        if app_type in ["Sonarr", "Whisparr"]
-        else "releaseDate",
-        "sortDirection": "descending",
-    }
-
-    if app_type in ["Sonarr", "Whisparr"]:
-        params["includeSeries"] = "true"
-    elif app_type == "Radarr":
-        params["includeMovie"] = "true"
-    elif app_type == "Lidarr":
-        params["includeArtist"] = "true"
-    elif app_type == "Readarr":
-        params["includeAuthor"] = "true"
-
-    # Fetch wanted/missing items
-    raw_data = await client.http_utils.request("wanted/missing", params=params)
-
-    if not isinstance(raw_data, dict) or "records" not in raw_data:
-        return {"data": []}
-
-    records = raw_data["records"]
-    events = []
-    for event in records:
-        item = parse_event(event, app_type)
-        if not item:
-            continue
-
-        # Ensure URLs are absolute if they are relative
-        base_url = entry.data["url"].rstrip("/")
-        api_key = entry.data["api_key"]
-
-        if item.get("poster") and item["poster"].startswith("/"):
-            sep = "&" if "?" in item["poster"] else "?"
-            item["poster"] = f"{base_url}{item['poster']}{sep}apikey={api_key}"
-        if item.get("fanart") and item["fanart"].startswith("/"):
-            sep = "&" if "?" in item["fanart"] else "?"
-            item["fanart"] = f"{base_url}{item['fanart']}{sep}apikey={api_key}"
-
-        events.append(item)
-
-    return {"data": events}
+    return {"data": data}
 
 
 async def async_handle_delete_queue_item(

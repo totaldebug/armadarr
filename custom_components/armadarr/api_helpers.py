@@ -10,7 +10,12 @@ from .const import LOGGER
 
 
 async def fetch_standard_data(
-    client: Any, app_type: str, last_history_id: int | None, entry_id: str, hass: Any
+    client: Any,
+    app_type: str,
+    last_history_id: int | None,
+    entry_id: str,
+    hass: Any,
+    upcoming_days: int,
 ) -> tuple[dict[str, Any], int | None]:
     """Fetch standard data (5 min interval)."""
     data = {}
@@ -21,6 +26,7 @@ async def fetch_standard_data(
         data["queue"] = await client.queue.get()
         data["health"] = await client.system.get_health()
         data["root_folder"] = await client.root_folder.get()
+        data["quality_profile"] = await client.quality_profile.get()
         data["system_status"] = await client.system.get_status()
 
         # Fetch history for events
@@ -44,7 +50,7 @@ async def fetch_standard_data(
 
     # Calendar data
     if app_type in ["Sonarr", "Radarr", "Lidarr", "Readarr", "Whisparr"]:
-        data["calendar"] = await _fetch_calendar_data(client, app_type)
+        data["calendar"] = await _fetch_calendar_data(client, app_type, upcoming_days)
 
     if app_type == "Bazarr":
         with contextlib.suppress(Exception):
@@ -56,14 +62,15 @@ async def fetch_standard_data(
     return data, new_last_history_id
 
 
-async def _fetch_calendar_data(client: Any, app_type: str) -> Any:
+async def _fetch_calendar_data(client: Any, app_type: str, upcoming_days: int) -> Any:
     """Fetch calendar data with app-specific parameters."""
     start = datetime.now(tz=UTC)
-    end = start + timedelta(days=30)
+    end = start + timedelta(days=upcoming_days)
 
     params = {
         "start": start.strftime("%Y-%m-%d"),
         "end": end.strftime("%Y-%m-%d"),
+        "unmonitored": "true",
     }
     if app_type in ["Sonarr", "Whisparr"]:
         params["includeSeries"] = "true"
@@ -77,7 +84,9 @@ async def _fetch_calendar_data(client: Any, app_type: str) -> Any:
     return await client.http_utils.request("calendar", params=params)
 
 
-async def fetch_daily_data(client: Any, app_type: str) -> dict[str, Any]:
+async def fetch_daily_data(
+    client: Any, app_type: str, entry_id: str, hass: Any, wanted_count: int
+) -> dict[str, Any]:
     """Fetch daily data (12 hour interval)."""
     data = {}
 
@@ -106,8 +115,37 @@ async def fetch_daily_data(client: Any, app_type: str) -> dict[str, Any]:
 
     if app_type in ["Sonarr", "Whisparr", "Radarr", "Lidarr", "Readarr"]:
         data["missing_count"] = await _fetch_missing_count(client, app_type)
+        data["wanted"] = await _fetch_wanted_data(client, app_type, wanted_count)
 
     return data
+
+
+async def _fetch_wanted_data(
+    client: Any, app_type: str, wanted_count: int
+) -> list[dict[str, Any]]:
+    """Fetch wanted data."""
+    params = {
+        "page": 1,
+        "pageSize": wanted_count,
+        "sortKey": "airDateUtc" if app_type in ["Sonarr", "Whisparr"] else "releaseDate",
+        "sortDirection": "descending",
+    }
+    if app_type in ["Sonarr", "Whisparr"]:
+        params["includeSeries"] = "true"
+    elif app_type == "Radarr":
+        params["includeMovie"] = "true"
+    elif app_type == "Lidarr":
+        params["includeArtist"] = "true"
+    elif app_type == "Readarr":
+        params["includeAuthor"] = "true"
+
+    try:
+        raw_data = await client.http_utils.request("wanted/missing", params=params)
+        if isinstance(raw_data, dict) and "records" in raw_data:
+            return raw_data["records"]
+    except Exception as e:  # noqa: BLE001
+        LOGGER.warning("Failed to fetch wanted data for %s: %s", app_type, e)
+    return []
 
 
 async def _fetch_missing_count(client: Any, app_type: str) -> int:

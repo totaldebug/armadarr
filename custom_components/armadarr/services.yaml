@@ -264,9 +264,9 @@ lookup_author:
       selector:
         text:
 
-list_upcoming_media:
-  name: List Upcoming Media
-  description: Retrieve upcoming media (episodes, movies, etc.) with rich metadata like posters and fanart.
+get_config_data:
+  name: Get Config Data
+  description: Retrieve configuration data like quality profiles and root folders.
   fields:
     entry_id:
       name: Integration ID
@@ -275,38 +275,6 @@ list_upcoming_media:
       selector:
         config_entry:
           integration: armadarr
-    days:
-      name: Days
-      description: Number of days to look ahead for upcoming media.
-      required: false
-      default: 30
-      selector:
-        number:
-          min: 1
-          max: 365
-          mode: box
-
-list_wanted_media:
-  name: List Wanted Media
-  description: Retrieve missing/wanted media (episodes, movies, etc.) with rich metadata like posters and fanart.
-  fields:
-    entry_id:
-      name: Integration ID
-      description: The ID of the Armadarr integration.
-      required: true
-      selector:
-        config_entry:
-          integration: armadarr
-    page_size:
-      name: Page Size
-      description: Number of items to retrieve.
-      required: false
-      default: 50
-      selector:
-        number:
-          min: 1
-          max: 1000
-          mode: box
 
 delete_queue_item:
   name: Delete Queue Item

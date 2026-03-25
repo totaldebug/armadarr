@@ -5,12 +5,6 @@ from homeassistant.helpers import config_validation as cv
 
 SCHEMA_BASE = vol.Schema({vol.Required("entry_id"): cv.string})
 SCHEMA_SYSTEM_TASK = SCHEMA_BASE.extend({vol.Required("task"): cv.string})
-SCHEMA_LIST_UPCOMING_MEDIA = SCHEMA_BASE.extend(
-    {vol.Optional("days", default=30): cv.positive_int}
-)
-SCHEMA_LIST_WANTED_MEDIA = SCHEMA_BASE.extend(
-    {vol.Optional("page_size", default=50): cv.positive_int}
-)
 SCHEMA_DELETE_QUEUE_ITEM = SCHEMA_BASE.extend(
     {vol.Required("item_id"): cv.positive_int}
 )

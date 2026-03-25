@@ -15,8 +15,7 @@ from .handlers import (
     async_handle_add_movie,
     async_handle_add_series,
     async_handle_delete_queue_item,
-    async_handle_list_upcoming_media,
-    async_handle_list_wanted_media,
+    async_handle_get_config_data,
     async_handle_lookup_artist,
     async_handle_lookup_author,
     async_handle_lookup_movie,
@@ -31,8 +30,6 @@ from .schemas import (
     SCHEMA_ADD_SERIES,
     SCHEMA_BASE,
     SCHEMA_DELETE_QUEUE_ITEM,
-    SCHEMA_LIST_UPCOMING_MEDIA,
-    SCHEMA_LIST_WANTED_MEDIA,
     SCHEMA_LOOKUP,
     SCHEMA_SYSTEM_TASK,
 )
@@ -68,15 +65,9 @@ async def async_setup_services(hass: HomeAssistant, app_type: str) -> None:
         SCHEMA_BASE,
     )
     _register(
-        "list_upcoming_media",
-        partial(async_handle_list_upcoming_media, hass),
-        SCHEMA_LIST_UPCOMING_MEDIA,
-        SupportsResponse.ONLY,
-    )
-    _register(
-        "list_wanted_media",
-        partial(async_handle_list_wanted_media, hass),
-        SCHEMA_LIST_WANTED_MEDIA,
+        "get_config_data",
+        partial(async_handle_get_config_data, hass),
+        SCHEMA_BASE,
         SupportsResponse.ONLY,
     )
     _register(
