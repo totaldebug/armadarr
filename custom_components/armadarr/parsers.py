@@ -35,6 +35,7 @@ def _parse_radarr_event(event: dict[str, Any], item: dict[str, Any]) -> None:
             "runtime": event.get("runtime", 0),
             "genres": ", ".join(event.get("genres", [])),
             "summary": event.get("overview", ""),
+            "trailer": event.get("youTubeTrailerId"),
         }
     )
     _parse_images(item, event.get("images", []))
@@ -53,6 +54,7 @@ def _parse_sonarr_event(event: dict[str, Any], item: dict[str, Any]) -> None:
             "studio": series.get("network", ""),
             "rating": series.get("ratings", {}).get("value", 0),
             "runtime": series.get("runtime", 0),
+            "trailer": series.get("youTubeTrailerId"),
         }
     )
     _parse_resource_data(event, "series", item)
@@ -76,6 +78,7 @@ def parse_event(event: dict[str, Any], app_type: str) -> dict[str, Any] | None:
     """Parse a single event based on app type."""
     item: dict[str, Any] = {}
 
+    item["id"] = event.get("id")
     title = event.get("title")
     series_title = event.get("series", {}).get("title")
     movie_title = event.get("movie", {}).get("title")

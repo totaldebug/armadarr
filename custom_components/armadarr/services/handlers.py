@@ -295,3 +295,25 @@ async def async_handle_delete_queue_item(
     client = await async_get_client(hass, entry_id)
 
     await client.queue.delete(item_id=item_id)
+
+
+async def async_handle_search_item(hass: HomeAssistant, call: ServiceCall) -> None:
+    """Handle search item service call."""
+    entry_id = call.data["entry_id"]
+    item_id = call.data["item_id"]
+    entry = hass.config_entries.async_get_entry(entry_id)
+    if not entry:
+        msg = f"Entry {entry_id} not found"
+        raise ArmadarrServiceError(msg)
+
+    client = entry.runtime_data.client
+    app_type = entry.data["app_type"]
+
+    if app_type in ["Sonarr", "Whisparr"]:
+        await client.command.execute(name="EpisodeSearch", episodeIds=[item_id])
+    elif app_type == "Radarr":
+        await client.command.execute(name="MovieSearch", movieIds=[item_id])
+    elif app_type == "Lidarr":
+        await client.command.execute(name="ArtistSearch", artistIds=[item_id])
+    elif app_type == "Readarr":
+        await client.command.execute(name="AuthorSearch", authorIds=[item_id])

@@ -9,6 +9,7 @@ SCHEMA_DELETE_QUEUE_ITEM = SCHEMA_BASE.extend(
     {vol.Required("item_id"): cv.positive_int}
 )
 SCHEMA_LOOKUP = SCHEMA_BASE.extend({vol.Required("term"): cv.string})
+SCHEMA_SEARCH_ITEM = SCHEMA_BASE.extend({vol.Required("item_id"): cv.positive_int})
 SCHEMA_ADD_BASE = SCHEMA_BASE.extend(
     {
         vol.Required("quality_profile_id"): cv.positive_int,

@@ -1818,7 +1818,7 @@ wheels = [
 
 [[package]]
 name = "pyarr"
-version = "6.3.0"
+version = "6.4.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backoff" },
@@ -1828,9 +1828,9 @@ dependencies = [
     { name = "types-requests" },
     { name = "yarl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7b/f0/cdebb4fffdbf2b096c242926e6022ae31eae43da71bffd60d672caecdf7e/pyarr-6.3.0.tar.gz", hash = "sha256:67b9047af0080576c184bf985bff1b78f4267e82dce7e9a3eea7d50737898a45", size = 45443, upload-time = "2026-03-23T12:14:56.938Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/ae/1b/b2fea914b3a91e997d725835d10bda3e344e23d7577356e7b302e8e94919/pyarr-6.4.0.tar.gz", hash = "sha256:5017cfc04762b968b0b282ea94c48ae17e30048bb39106347aefb8b49219b979", size = 45945, upload-time = "2026-03-26T17:30:23.28Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b9/53/d8e30b10c1611b04189a14763887580555c4c77a4375eebe05cb08fa5b0d/pyarr-6.3.0-py3-none-any.whl", hash = "sha256:197fed37e0c5c4d6008dd99ba4196ef8684a0ab7c87b97a502b05a285fc6145a", size = 125844, upload-time = "2026-03-23T12:14:55.925Z" },
+    { url = "https://files.pythonhosted.org/packages/3d/59/0c15045fa17cd253a6c1a157c6308231673c03b89489829df33e61b4ee3a/pyarr-6.4.0-py3-none-any.whl", hash = "sha256:877ed741f51989a78e31e745ad1a3d31b0de6872813563284039644a509dbe1f", size = 128111, upload-time = "2026-03-26T17:30:24.38Z" },
 ]
 
 [[package]]
@@ -1859,7 +1859,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "homeassistant", specifier = ">=2026.2.3" },
-    { name = "pyarr", specifier = ">=6.3.0" },
+    { name = "pyarr", specifier = "==6.4.0" },
 ]
 
 [package.metadata.requires-dev]

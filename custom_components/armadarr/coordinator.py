@@ -2,12 +2,12 @@
 
 from __future__ import annotations
 
-from datetime import timedelta
+import contextlib
+from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .api_helpers import fetch_daily_data, fetch_standard_data
 from .const import (
     CONF_UPCOMING_DAYS,
     CONF_WANTED_COUNT,
@@ -47,21 +47,73 @@ class StandardCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Update data via library."""
         client = self.config_entry.runtime_data.client
         app_type = self.config_entry.data["app_type"]
-        upcoming_days = self.config_entry.options.get(
-            CONF_UPCOMING_DAYS,
-            self.config_entry.data.get(CONF_UPCOMING_DAYS, DEFAULT_UPCOMING_DAYS),
+        upcoming_days = int(
+            self.config_entry.options.get(
+                CONF_UPCOMING_DAYS,
+                self.config_entry.data.get(CONF_UPCOMING_DAYS, DEFAULT_UPCOMING_DAYS),
+            )
         )
 
+        data: dict[str, Any] = {}
+
         try:
-            data, new_last_history_id = await fetch_standard_data(
-                client,
-                app_type,
-                self.last_history_id,
-                self.config_entry.entry_id,
-                self.hass,
-                upcoming_days,
-            )
-            self.last_history_id = new_last_history_id
+            # Common data for most apps
+            if app_type not in ["Bazarr", "Prowlarr"]:
+                data["queue"] = await client.queue.get()
+                data["health"] = await client.system.get_health()
+                data["root_folder"] = await client.root_folder.get()
+                data["quality_profile"] = await client.quality_profile.get()
+                data["system_status"] = await client.system.get_status()
+
+                # Fetch history for events
+                history = await client.history.get(page=1, page_size=10)
+                if history and "records" in history:
+                    records = history["records"]
+                    if self.last_history_id is not None:
+                        for record in reversed(records):  # Process oldest to newest
+                            if record.get("id", 0) > self.last_history_id:
+                                event_data = {
+                                    "app_type": app_type,
+                                    "entry_id": self.config_entry.entry_id,
+                                    "event_type": record.get("eventType"),
+                                    "source_title": record.get("sourceTitle"),
+                                    "date": record.get("date"),
+                                }
+                                self.hass.bus.async_fire(
+                                    "armadarr_history_event", event_data
+                                )
+
+                    if records:
+                        self.last_history_id = max(r.get("id", 0) for r in records)
+
+            # Calendar data
+            if app_type in ["Sonarr", "Radarr", "Lidarr", "Readarr", "Whisparr"]:
+                start = datetime.now(tz=UTC)
+                end = start + timedelta(days=upcoming_days)
+                kwargs = {}
+                if app_type in ["Sonarr", "Whisparr"]:
+                    kwargs["includeSeries"] = True
+                elif app_type == "Radarr":
+                    kwargs["includeMovie"] = True
+                elif app_type == "Lidarr":
+                    kwargs["includeArtist"] = True
+                elif app_type == "Readarr":
+                    kwargs["includeAuthor"] = True
+
+                data["calendar"] = await client.calendar.get(
+                    start_date=start,
+                    end_date=end,
+                    unmonitored=True,
+                    **kwargs,
+                )
+
+            if app_type == "Bazarr":
+                with contextlib.suppress(Exception):
+                    data["system_status"] = await client.system.get_status()
+
+            if app_type == "Prowlarr":
+                data["indexer_status"] = await client.indexer.get()
+
         except Exception as exception:
             msg = f"Error communicating with API: {exception}"
             raise UpdateFailed(msg) from exception
@@ -92,19 +144,68 @@ class DailyCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         """Update data via library."""
         client = self.config_entry.runtime_data.client
         app_type = self.config_entry.data["app_type"]
-        wanted_count = self.config_entry.options.get(
-            CONF_WANTED_COUNT,
-            self.config_entry.data.get(CONF_WANTED_COUNT, DEFAULT_WANTED_COUNT),
+        wanted_count = int(
+            self.config_entry.options.get(
+                CONF_WANTED_COUNT,
+                self.config_entry.data.get(CONF_WANTED_COUNT, DEFAULT_WANTED_COUNT),
+            )
         )
 
+        data: dict[str, Any] = {}
+
         try:
-            return await fetch_daily_data(
-                client,
-                app_type,
-                self.config_entry.entry_id,
-                self.hass,
-                wanted_count,
-            )
+            if app_type in ["Sonarr", "Whisparr"]:
+                data["series"] = await client.series.get()
+                data["unmonitored_count"] = sum(
+                    1 for s in data["series"] if not s.get("monitored")
+                )
+            elif app_type == "Radarr":
+                data["movies"] = await client.movie.get()
+                data["unmonitored_count"] = sum(
+                    1 for m in data["movies"] if not m.get("monitored")
+                )
+            elif app_type == "Lidarr":
+                data["artists"] = await client.artist.get()
+                data["unmonitored_count"] = sum(
+                    1 for a in data["artists"] if not a.get("monitored")
+                )
+            elif app_type == "Readarr":
+                data["authors"] = await client.author.get()
+                data["unmonitored_count"] = sum(
+                    1 for a in data["authors"] if not a.get("monitored")
+                )
+            elif app_type == "Prowlarr":
+                data["indexers"] = await client.indexer_proxy.get()
+
+            if app_type in ["Sonarr", "Whisparr", "Radarr", "Lidarr", "Readarr"]:
+                # Fetch missing count
+                missing_data = await client.wanted.get(page=1, page_size=1)
+                data["missing_count"] = int(missing_data.get("totalRecords", 0))
+
+                # Fetch wanted data
+                kwargs = {}
+                if app_type in ["Sonarr", "Whisparr"]:
+                    kwargs["includeSeries"] = True
+                elif app_type == "Radarr":
+                    kwargs["includeMovie"] = True
+                elif app_type == "Lidarr":
+                    kwargs["includeArtist"] = True
+                elif app_type == "Readarr":
+                    kwargs["includeAuthor"] = True
+
+                wanted_data = await client.wanted.get(
+                    page=1,
+                    page_size=wanted_count,
+                    sort_key="airDateUtc"
+                    if app_type in ["Sonarr", "Whisparr"]
+                    else "releaseDate",
+                    sort_dir="descending",
+                    **kwargs,
+                )
+                data["wanted"] = wanted_data.get("records", [])
+
         except Exception as exception:
             msg = f"Error communicating with API: {exception}"
             raise UpdateFailed(msg) from exception
+        else:
+            return data

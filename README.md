@@ -21,7 +21,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/totaldebug/armadarr">
-    <img src="logo.png" alt="Logo" width="400">
+    <img src="brand/logo.png" alt="Logo" width="400">
   </a>
 
   <h3 align="center">Armadarr</h3>
@@ -63,6 +63,8 @@
 ## About The Project
 
 Armadarr is a comprehensive Home Assistant integration for managing your "*Arr" applications (Sonarr, Radarr, Lidarr, Readarr, Prowlarr, Bazarr, and Whisparr). It provides sensors, binary sensors, buttons, and a calendar to monitor and control your media management stack.
+
+For the best results, it is recommended to use the [Armadarr Card](https://github.com/totaldebug/armadarr-card) alongside this integration.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -177,7 +179,7 @@ These services return the raw search results from the application, useful for fi
 - **Multiple Instances**: You can add multiple instances of the same app type (e.g., Sonarr and Sonarr-4K) by repeating the configuration flow.
 - **Calendar**: Use the built-in Calendar card to see what's airing soon.
 - **Automation**: Use the `armadarr_history_event` to trigger notifications when a download completes.
-- **Dashboards**: Use the `get_upcoming_media` service with the [Upcoming Media Card](https://github.com/custom-cards/upcoming-media-card) or similar for a rich visual experience.
+- **Dashboards**: For the best results, use the [Armadarr Card][armadarr-card-url] to display your media queue and upcoming items directly in your Home Assistant dashboard.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -240,3 +242,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 [python-url]: https://www.python.org/
 [home-assistant]: https://img.shields.io/badge/Home%20Assistant-blue?style=flat-square&logo=home-assistant&logoColor=white
 [home-assistant-url]: https://www.home-assistant.io/
+[armadarr-card-url]: https://github.com/totaldebug/armadarr-card

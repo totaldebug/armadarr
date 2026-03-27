@@ -20,6 +20,7 @@ from .handlers import (
     async_handle_lookup_author,
     async_handle_lookup_movie,
     async_handle_lookup_series,
+    async_handle_search_item,
     async_handle_search_missing,
     async_handle_system_task,
 )
@@ -31,6 +32,7 @@ from .schemas import (
     SCHEMA_BASE,
     SCHEMA_DELETE_QUEUE_ITEM,
     SCHEMA_LOOKUP,
+    SCHEMA_SEARCH_ITEM,
     SCHEMA_SYSTEM_TASK,
 )
 
@@ -74,6 +76,11 @@ async def async_setup_services(hass: HomeAssistant, app_type: str) -> None:
         "delete_queue_item",
         partial(async_handle_delete_queue_item, hass),
         SCHEMA_DELETE_QUEUE_ITEM,
+    )
+    _register(
+        "search_item",
+        partial(async_handle_search_item, hass),
+        SCHEMA_SEARCH_ITEM,
     )
 
     # App-specific services

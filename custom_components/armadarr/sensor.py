@@ -100,6 +100,7 @@ class ArmadarrSensor(ArmadarrEntity, SensorEntity):
         }
 
         if self.entity_description.key in ["upcoming_media", "wanted_media"]:
+            attrs["type"] = self.entity_description.key
             data_key = (
                 "calendar"
                 if self.entity_description.key == "upcoming_media"
@@ -111,6 +112,22 @@ class ArmadarrSensor(ArmadarrEntity, SensorEntity):
             api_key = self.config_entry.data["api_key"]
 
             items = []
+            # Add template item at index 0 for compatibility with upcoming-media-card
+            template = {
+                "title_default": "$title",
+                "line1_default": "$episode" if app_type in ["Sonarr", "Whisparr"] else "$release",
+                "line2_default": "$number" if app_type in ["Sonarr", "Whisparr"] else "$runtime",
+                "line3_default": "$airdate" if app_type in ["Sonarr", "Whisparr"] else "$rating",
+                "line4_default": "$studio" if app_type in ["Sonarr", "Whisparr"] else "$genres",
+                "icon": "mdi:television" if app_type in ["Sonarr", "Whisparr"] else "mdi:movie",
+            }
+            if app_type == "Lidarr":
+                template.update({"line1_default": "$artist", "line2_default": "$album", "icon": "mdi:music"})
+            elif app_type == "Readarr":
+                template.update({"line1_default": "$author", "line2_default": "$release", "icon": "mdi:book"})
+            
+            items.append(template)
+
             for event in raw_data:
                 item = parse_event(event, app_type)
                 if not item:

@@ -294,3 +294,22 @@ delete_queue_item:
       selector:
         number:
           mode: box
+
+search_item:
+  name: Search Item
+  description: Trigger a search for a specific item (episode, movie, artist, author).
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    item_id:
+      name: Item ID
+      description: The ID of the item to search for.
+      required: true
+      selector:
+        number:
+          mode: box
