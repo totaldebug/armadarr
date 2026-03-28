@@ -77,13 +77,16 @@ async def test_flow_user_non_media_app(hass: HomeAssistant) -> None:
     assert result["type"] == data_entry_flow.FlowResultType.FORM
     assert result["step_id"] == "user"
 
-    with patch(
-        "custom_components.armadarr.config_flow.ArmadarrFlowHandler._test_connection",
-        return_value=None,
-    ), patch(
-        "custom_components.armadarr.async_setup_entry",
-        return_value=True,
-    ) as mock_setup_entry:
+    with (
+        patch(
+            "custom_components.armadarr.config_flow.ArmadarrFlowHandler._test_connection",
+            return_value=None,
+        ),
+        patch(
+            "custom_components.armadarr.async_setup_entry",
+            return_value=True,
+        ) as mock_setup_entry,
+    ):
         result = await hass.config_entries.flow.async_configure(
             result["flow_id"],
             user_input={

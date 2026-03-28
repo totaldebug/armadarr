@@ -9,7 +9,7 @@
   "iot_class": "local_polling",
   "issue_tracker": "https://github.com/totaldebug/armadarr/issues",
   "requirements": [
-    "pyarr>=6.3.0"
+    "pyarr>=6.5.0"
   ],
   "version": "0.1.1"
 }

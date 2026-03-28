@@ -40,3 +40,25 @@ SCHEMA_ADD_ARTIST = SCHEMA_ADD_ARTIST_AUTHOR_BASE.extend(
 SCHEMA_ADD_AUTHOR = SCHEMA_ADD_ARTIST_AUTHOR_BASE.extend(
     {vol.Optional("author_id"): cv.string}
 )
+SCHEMA_DISPATCHARR_REFRESH_M3U = SCHEMA_BASE.extend(
+    {
+        vol.Optional("data"): dict,
+    }
+)
+SCHEMA_DISPATCHARR_REFRESH_EPG = SCHEMA_BASE.extend(
+    {
+        vol.Optional("data"): dict,
+    }
+)
+SCHEMA_DISPATCHARR_RUN_PLUGIN = SCHEMA_BASE.extend(
+    {
+        vol.Required("plugin_id"): cv.string,
+        vol.Optional("data"): dict,
+    }
+)
+SCHEMA_DISPATCHARR_PROXY_ACTION = SCHEMA_BASE.extend(
+    {
+        vol.Required("action"): vol.In(["change_stream", "next_stream", "stop_stream"]),
+        vol.Required("channel_id"): cv.positive_int,
+    }
+)

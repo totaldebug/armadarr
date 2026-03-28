@@ -20,6 +20,7 @@ class ArmadarrSensorEntityDescription(SensorEntityDescription):
     """Class describing Armadarr sensor entities."""
 
     value_fn: Callable[[Any], Any]
+    attr_fn: Callable[[Any], dict[str, Any]] | None = None
 
 
 def get_common_sensors() -> list[ArmadarrSensorEntityDescription]:
@@ -134,8 +135,8 @@ def get_media_sensors() -> list[ArmadarrSensorEntityDescription]:
 
 def get_app_specific_sensors(app_type: str) -> list[ArmadarrSensorEntityDescription]:
     """Get sensors specific to an app type."""
-    if app_type in ["Sonarr", "Whisparr"]:
-        return [
+    app_sensors: dict[str, list[ArmadarrSensorEntityDescription]] = {
+        "Sonarr": [
             ArmadarrSensorEntityDescription(
                 key="series_count",
                 name="Series Count",
@@ -143,9 +144,8 @@ def get_app_specific_sensors(app_type: str) -> list[ArmadarrSensorEntityDescript
                 state_class=SensorStateClass.MEASUREMENT,
                 value_fn=lambda data: len(data.get("series", [])) if data else 0,
             )
-        ]
-    if app_type == "Radarr":
-        return [
+        ],
+        "Radarr": [
             ArmadarrSensorEntityDescription(
                 key="movie_count",
                 name="Movie Count",
@@ -153,9 +153,8 @@ def get_app_specific_sensors(app_type: str) -> list[ArmadarrSensorEntityDescript
                 state_class=SensorStateClass.MEASUREMENT,
                 value_fn=lambda data: len(data.get("movies", [])) if data else 0,
             )
-        ]
-    if app_type == "Lidarr":
-        return [
+        ],
+        "Lidarr": [
             ArmadarrSensorEntityDescription(
                 key="artist_count",
                 name="Artist Count",
@@ -163,9 +162,8 @@ def get_app_specific_sensors(app_type: str) -> list[ArmadarrSensorEntityDescript
                 state_class=SensorStateClass.MEASUREMENT,
                 value_fn=lambda data: len(data.get("artists", [])) if data else 0,
             )
-        ]
-    if app_type == "Readarr":
-        return [
+        ],
+        "Readarr": [
             ArmadarrSensorEntityDescription(
                 key="author_count",
                 name="Author Count",
@@ -173,15 +171,20 @@ def get_app_specific_sensors(app_type: str) -> list[ArmadarrSensorEntityDescript
                 state_class=SensorStateClass.MEASUREMENT,
                 value_fn=lambda data: len(data.get("authors", [])) if data else 0,
             )
-        ]
-    if app_type == "Prowlarr":
-        return [
+        ],
+        "Prowlarr": [
             ArmadarrSensorEntityDescription(
                 key="indexer_count",
                 name="Indexer Count",
                 icon="mdi:format-list-bulleted",
                 state_class=SensorStateClass.MEASUREMENT,
-                value_fn=lambda data: len(data.get("indexer_status", [])) if data else 0,
+                value_fn=lambda data: (
+                    len(data.get("indexer_status", []))
+                    if data.get("indexer_status")
+                    else len(data.get("indexer_stats", {}).get("indexers", []))
+                    if data
+                    else 0
+                ),
             ),
             ArmadarrSensorEntityDescription(
                 key="indexer_errors",
@@ -200,15 +203,362 @@ def get_app_specific_sensors(app_type: str) -> list[ArmadarrSensorEntityDescript
                     else 0
                 ),
             ),
-        ]
-    if app_type == "Dispatcharr":
-        return [
+            ArmadarrSensorEntityDescription(
+                key="indexer_avg_response_time",
+                name="Average Indexer Response Time",
+                icon="mdi:timer-outline",
+                native_unit_of_measurement="ms",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        round(
+                            sum(
+                                s.get("averageResponseTime", 0)
+                                for s in data.get("indexer_stats", {})
+                                .get("indexers", [])
+                                if isinstance(s, dict)
+                            )
+                            / len(data.get("indexer_stats", {}).get("indexers", []))
+                            if data.get("indexer_stats", {}).get("indexers")
+                            else 0,
+                            2,
+                        )
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+            ArmadarrSensorEntityDescription(
+                key="indexer_total_queries",
+                name="Total Indexer Queries",
+                icon="mdi:format-list-bulleted",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    sum(
+                        s.get("numberOfQueries", 0)
+                        for s in data.get("indexer_stats", {}).get("indexers", [])
+                        if isinstance(s, dict)
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+        ],
+        "Dispatcharr": [
             ArmadarrSensorEntityDescription(
                 key="indexer_count",
                 name="Indexer Count",
                 icon="mdi:format-list-bulleted",
                 state_class=SensorStateClass.MEASUREMENT,
-                value_fn=lambda data: len(data.get("indexer_status", [])) if data else 0,
+                value_fn=lambda data: (
+                    len(data.get("indexer_status", []))
+                    if data.get("indexer_status")
+                    else len(data.get("indexer_stats", {}).get("indexers", []))
+                    if data
+                    else 0
+                ),
             ),
-        ]
-    return []
+            ArmadarrSensorEntityDescription(
+                key="channel_count",
+                name="Channel Count",
+                icon="mdi:television-guide",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        data.get("channels", {}).get(
+                            "count", len(data.get("channels", []))
+                        )
+                        if isinstance(data.get("channels"), dict)
+                        else len(data.get("channels", []))
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+            ArmadarrSensorEntityDescription(
+                key="stream_count",
+                name="Stream Count",
+                icon="mdi:play-network",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        data.get("streams", {}).get(
+                            "count", len(data.get("streams", []))
+                        )
+                        if isinstance(data.get("streams"), dict)
+                        else len(data.get("streams", []))
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+            ArmadarrSensorEntityDescription(
+                key="vod_count",
+                name="VOD Count",
+                icon="mdi:video-library",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        data.get("vod", {}).get("count", len(data.get("vod", [])))
+                        if isinstance(data.get("vod"), dict)
+                        else len(data.get("vod", []))
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+            ArmadarrSensorEntityDescription(
+                key="plugin_count",
+                name="Plugin Count",
+                icon="mdi:plugin",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: len(data.get("plugins", [])) if data else 0,
+            ),
+            ArmadarrSensorEntityDescription(
+                key="backup_count",
+                name="Backup Count",
+                icon="mdi:backup-restore",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: len(data.get("backups", [])) if data else 0,
+            ),
+            ArmadarrSensorEntityDescription(
+                key="m3u_account_count",
+                name="M3U Account Count",
+                icon="mdi:account-details",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        data.get("m3u_accounts", {}).get(
+                            "count", len(data.get("m3u_accounts", []))
+                        )
+                        if isinstance(data.get("m3u_accounts"), dict)
+                        else len(data.get("m3u_accounts", []))
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+            ArmadarrSensorEntityDescription(
+                key="epg_source_count",
+                name="EPG Source Count",
+                icon="mdi:file-xml",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        data.get("epg_sources", {}).get(
+                            "count", len(data.get("epg_sources", []))
+                        )
+                        if isinstance(data.get("epg_sources"), dict)
+                        else len(data.get("epg_sources", []))
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+            ArmadarrSensorEntityDescription(
+                key="active_streams",
+                name="Active Streams",
+                icon="mdi:play-speed",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        len(data.get("proxy_status", []))
+                        if isinstance(data.get("proxy_status"), list)
+                        else 0
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+            ArmadarrSensorEntityDescription(
+                key="channel_group_count",
+                name="Channel Group Count",
+                icon="mdi:folder-multiple",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        data.get("channel_groups", {}).get(
+                            "count", len(data.get("channel_groups", []))
+                        )
+                        if isinstance(data.get("channel_groups"), dict)
+                        else len(data.get("channel_groups", []))
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+            ArmadarrSensorEntityDescription(
+                key="channel_profile_count",
+                name="Channel Profile Count",
+                icon="mdi:account-settings",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        data.get("channel_profiles", {}).get(
+                            "count", len(data.get("channel_profiles", []))
+                        )
+                        if isinstance(data.get("channel_profiles"), dict)
+                        else len(data.get("channel_profiles", []))
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+            ArmadarrSensorEntityDescription(
+                key="connect_integration_count",
+                name="Connect Integration Count",
+                icon="mdi:link-variant",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        data.get("connect_integrations", {}).get(
+                            "count", len(data.get("connect_integrations", []))
+                        )
+                        if isinstance(data.get("connect_integrations"), dict)
+                        else len(data.get("connect_integrations", []))
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+            ArmadarrSensorEntityDescription(
+                key="hdhr_device_count",
+                name="HDHR Device Count",
+                icon="mdi:television-box",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: (
+                    (
+                        data.get("hdhr_devices", {}).get(
+                            "count", len(data.get("hdhr_devices", []))
+                        )
+                        if isinstance(data.get("hdhr_devices"), dict)
+                        else len(data.get("hdhr_devices", []))
+                    )
+                    if data
+                    else 0
+                ),
+            ),
+        ],
+    }
+    app_sensors["Whisparr"] = app_sensors["Sonarr"]
+
+    return app_sensors.get(app_type, [])
+
+
+def get_prowlarr_stats_sensors(
+    stats: dict[str, Any],
+) -> list[ArmadarrSensorEntityDescription]:
+    """Get dynamic sensors for Prowlarr indexer stats."""
+    sensors = []
+
+    # Indexers
+    for indexer in stats.get("indexers", []):
+        name = indexer.get("indexerName", "Unknown")
+        safe_name = name.lower().replace(" ", "_")
+
+        # Queries Sensor
+        sensors.append(
+            ArmadarrSensorEntityDescription(
+                key=f"indexer_{safe_name}_queries",
+                name=f"{name} Queries",
+                icon="mdi:format-list-bulleted",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data, n=name: next(
+                    (
+                        i.get("numberOfQueries", 0)
+                        for i in data.get("indexer_stats", {}).get("indexers", [])
+                        if i.get("indexerName") == n
+                    ),
+                    0,
+                ),
+                attr_fn=lambda data, n=name: next(
+                    (
+                        i
+                        for i in data.get("indexer_stats", {}).get("indexers", [])
+                        if i.get("indexerName") == n
+                    ),
+                    {},
+                ),
+            )
+        )
+
+        # Avg Response Time Sensor
+        sensors.append(
+            ArmadarrSensorEntityDescription(
+                key=f"indexer_{safe_name}_avg_response_time",
+                name=f"{name} Avg Response Time",
+                icon="mdi:timer-outline",
+                native_unit_of_measurement="ms",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data, n=name: next(
+                    (
+                        i.get("averageResponseTime", 0)
+                        for i in data.get("indexer_stats", {}).get("indexers", [])
+                        if i.get("indexerName") == n
+                    ),
+                    0,
+                ),
+            )
+        )
+
+    # User Agents
+    for agent in stats.get("userAgents", []):
+        name = agent.get("userAgent", "Unknown")
+        safe_name = name.lower().replace(" ", "_")
+
+        sensors.append(
+            ArmadarrSensorEntityDescription(
+                key=f"ua_{safe_name}_queries",
+                name=f"UA {name} Queries",
+                icon="mdi:account-search",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data, n=name: next(
+                    (
+                        a.get("numberOfQueries", 0)
+                        for a in data.get("indexer_stats", {}).get("userAgents", [])
+                        if a.get("userAgent") == n
+                    ),
+                    0,
+                ),
+                attr_fn=lambda data, n=name: next(
+                    (
+                        a
+                        for a in data.get("indexer_stats", {}).get("userAgents", [])
+                        if a.get("userAgent") == n
+                    ),
+                    {},
+                ),
+            )
+        )
+
+    # Hosts
+    for host in stats.get("hosts", []):
+        name = host.get("host", "Unknown")
+        safe_name = name.lower().replace(" ", "_")
+
+        sensors.append(
+            ArmadarrSensorEntityDescription(
+                key=f"host_{safe_name}_queries",
+                name=f"Host {name} Queries",
+                icon="mdi:server",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data, n=name: next(
+                    (
+                        h.get("numberOfQueries", 0)
+                        for h in data.get("indexer_stats", {}).get("hosts", [])
+                        if h.get("host") == n
+                    ),
+                    0,
+                ),
+                attr_fn=lambda data, n=name: next(
+                    (
+                        h
+                        for h in data.get("indexer_stats", {}).get("hosts", [])
+                        if h.get("host") == n
+                    ),
+                    {},
+                ),
+            )
+        )
+
+    return sensors

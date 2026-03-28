@@ -14,6 +14,7 @@ from .sensor_descriptions import (
     get_common_sensors,
     get_disk_space_sensors,
     get_media_sensors,
+    get_prowlarr_stats_sensors,
 )
 
 if TYPE_CHECKING:
@@ -61,13 +62,21 @@ async def async_setup_entry(
             entities.append(ArmadarrSensor(coordinator, description))
 
     for description in get_app_specific_sensors(app_type):
-        # Prowlarr/Dispatcharr indexer sensors use standard_coordinator, others use daily
+        # Prowlarr/Dispatcharr sensors use standard_coordinator, others use daily
         coordinator = (
             standard_coordinator
-            if description.key in ["indexer_count", "indexer_errors"]
+            if app_type in ["Prowlarr", "Dispatcharr"]
             else daily_coordinator
         )
         entities.append(ArmadarrSensor(coordinator, description))
+
+    # Prowlarr Dynamic Stats Sensors
+    if app_type == "Prowlarr":
+        stats = standard_coordinator.data.get("indexer_stats", {})
+        entities.extend(
+            ArmadarrSensor(standard_coordinator, description)
+            for description in get_prowlarr_stats_sensors(stats)
+        )
 
     async_add_entities(entities)
 
@@ -98,6 +107,9 @@ class ArmadarrSensor(ArmadarrEntity, SensorEntity):
             "entry_id": self.config_entry.entry_id,
             "app_type": self.config_entry.data["app_type"],
         }
+
+        if self.entity_description.attr_fn:
+            attrs.update(self.entity_description.attr_fn(self.coordinator.data))
 
         if self.entity_description.key in ["upcoming_media", "wanted_media"]:
             attrs["type"] = self.entity_description.key

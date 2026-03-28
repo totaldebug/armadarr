@@ -2,10 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
-
-from ..parsers import parse_event
 
 if TYPE_CHECKING:
     from homeassistant.core import HomeAssistant, ServiceCall
@@ -324,3 +321,48 @@ async def async_handle_sync_indexers(hass: HomeAssistant, call: ServiceCall) -> 
     entry_id = call.data["entry_id"]
     client = await async_get_client(hass, entry_id)
     await client.command.execute(name="AppIndexerSync")
+
+
+async def async_handle_dispatcharr_refresh_m3u(
+    hass: HomeAssistant, call: ServiceCall
+) -> None:
+    """Handle Dispatcharr refresh M3U service call."""
+    entry_id = call.data["entry_id"]
+    client = await async_get_client(hass, entry_id)
+    await client.m3u.refresh(data=call.data.get("data", {}))
+
+
+async def async_handle_dispatcharr_refresh_epg(
+    hass: HomeAssistant, call: ServiceCall
+) -> None:
+    """Handle Dispatcharr refresh EPG service call."""
+    entry_id = call.data["entry_id"]
+    client = await async_get_client(hass, entry_id)
+    await client.epg.import_epg(data=call.data.get("data", {}))
+
+
+async def async_handle_dispatcharr_run_plugin(
+    hass: HomeAssistant, call: ServiceCall
+) -> None:
+    """Handle Dispatcharr run plugin service call."""
+    entry_id = call.data["entry_id"]
+    plugin_id = call.data["plugin_id"]
+    client = await async_get_client(hass, entry_id)
+    await client.plugins.run(item_id=plugin_id, data=call.data.get("data", {}))
+
+
+async def async_handle_dispatcharr_proxy_action(
+    hass: HomeAssistant, call: ServiceCall
+) -> None:
+    """Handle Dispatcharr proxy action service call."""
+    entry_id = call.data["entry_id"]
+    action = call.data["action"]
+    channel_id = call.data["channel_id"]
+    client = await async_get_client(hass, entry_id)
+
+    if action == "change_stream":
+        await client.proxy.change_ts_stream(channel_id=channel_id)
+    elif action == "next_stream":
+        await client.proxy.next_ts_stream(channel_id=channel_id)
+    elif action == "stop_stream":
+        await client.proxy.stop_ts_stream(channel_id=channel_id)

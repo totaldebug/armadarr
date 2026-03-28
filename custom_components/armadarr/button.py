@@ -69,6 +69,18 @@ async def async_setup_entry(
                 ),
             )
         )
+        if app_type == "Dispatcharr":
+            entities.append(
+                ArmadarrButton(
+                    coordinator,
+                    ArmadarrButtonEntityDescription(
+                        key="reload_plugins",
+                        name="Reload Plugins",
+                        icon="mdi:plugin",
+                        press_fn=lambda client: client.plugins.reload(),
+                    ),
+                )
+            )
     elif app_type == "Bazarr":
         entities.append(
             ArmadarrButton(

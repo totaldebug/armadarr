@@ -6,7 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "homeassistant>=2026.2.3",
-    "pyarr>=6.4.0",
+    "pyarr==6.5.0",
 ]
 
 [dependency-groups]

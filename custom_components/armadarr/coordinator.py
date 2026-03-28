@@ -58,7 +58,7 @@ class StandardCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         try:
             # Common data for most apps
-            if app_type not in ["Bazarr"]:
+            if app_type != "Bazarr":
                 data["system_status"] = await client.system.get_status()
 
             if app_type not in ["Bazarr", "Prowlarr", "Dispatcharr"]:
@@ -113,8 +113,24 @@ class StandardCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 with contextlib.suppress(Exception):
                     data["system_status"] = await client.system.get_status()
 
-            if app_type in ["Prowlarr", "Dispatcharr"]:
+            if app_type == "Prowlarr":
                 data["indexer_status"] = await client.indexer.get()
+                data["indexer_stats"] = await client.indexer.get_stats()
+
+            if app_type == "Dispatcharr":
+                data["indexer_status"] = await client.indexer.get()
+                data["channels"] = await client.channels.get()
+                data["streams"] = await client.streams.get()
+                data["vod"] = await client.vod.get_all()
+                data["plugins"] = await client.plugins.get()
+                data["backups"] = await client.backups.get()
+                data["m3u_accounts"] = await client.m3u.get_accounts()
+                data["epg_sources"] = await client.epg.get_sources()
+                data["proxy_status"] = await client.proxy.get_ts_status()
+                data["channel_groups"] = await client.channel_groups.get()
+                data["channel_profiles"] = await client.channel_profiles.get()
+                data["connect_integrations"] = await client.connect.get_integrations()
+                data["hdhr_devices"] = await client.hdhr.get_devices()
 
         except Exception as exception:
             msg = f"Error communicating with API: {exception}"

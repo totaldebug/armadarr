@@ -325,3 +325,95 @@ sync_indexers:
       selector:
         config_entry:
           integration: armadarr
+
+refresh_m3u:
+  name: Refresh M3U
+  description: Refresh M3U data for Dispatcharr.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    data:
+      name: Data
+      description: Optional data for the refresh (e.g., account_id).
+      required: false
+      selector:
+        object:
+
+refresh_epg:
+  name: Refresh EPG
+  description: Refresh EPG data for Dispatcharr.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    data:
+      name: Data
+      description: Optional data for the refresh.
+      required: false
+      selector:
+        object:
+
+run_plugin:
+  name: Run Plugin
+  description: Run a plugin for Dispatcharr.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    plugin_id:
+      name: Plugin ID
+      description: The ID of the plugin to run.
+      required: true
+      selector:
+        text:
+    data:
+      name: Data
+      description: Optional data for the plugin run.
+      required: false
+      selector:
+        object:
+
+proxy_action:
+  name: Proxy Action
+  description: Perform a proxy action for Dispatcharr.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
+    action:
+      name: Action
+      description: The action to perform.
+      required: true
+      selector:
+        select:
+          options:
+            - label: Change Stream
+              value: change_stream
+            - label: Next Stream
+              value: next_stream
+            - label: Stop Stream
+              value: stop_stream
+    channel_id:
+      name: Channel ID
+      description: The ID of the channel.
+      required: true
+      selector:
+        number:
+          mode: box
