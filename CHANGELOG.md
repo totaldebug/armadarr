@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.1](https://github.com/totaldebug/armadarr/compare/v0.1.0...v0.1.1) (2026-03-28)
+
+
+### Bug Fixes
+
+* **prowlarr:** always shows disconnected and 0 indexers ([6f260e4](https://github.com/totaldebug/armadarr/commit/6f260e42af393f17daee69512f2fe657f74cd597))
+
 ## 0.1.0 (2026-03-27)
 
 
