@@ -37,7 +37,7 @@ async def async_setup_entry(
     entities: list[ArmadarrSensor] = []
 
     # Common Sensors (Standard Coordinator)
-    if app_type not in ["Bazarr", "Prowlarr"]:
+    if app_type not in ["Bazarr", "Prowlarr", "Dispatcharr"]:
         entities.extend(
             ArmadarrSensor(standard_coordinator, description)
             for description in get_common_sensors()
@@ -61,10 +61,10 @@ async def async_setup_entry(
             entities.append(ArmadarrSensor(coordinator, description))
 
     for description in get_app_specific_sensors(app_type):
-        # Prowlarr indexer_errors uses standard_coordinator, others use daily
+        # Prowlarr/Dispatcharr indexer sensors use standard_coordinator, others use daily
         coordinator = (
             standard_coordinator
-            if description.key == "indexer_errors"
+            if description.key in ["indexer_count", "indexer_errors"]
             else daily_coordinator
         )
         entities.append(ArmadarrSensor(coordinator, description))
@@ -115,17 +115,35 @@ class ArmadarrSensor(ArmadarrEntity, SensorEntity):
             # Add template item at index 0 for compatibility with upcoming-media-card
             template = {
                 "title_default": "$title",
-                "line1_default": "$episode" if app_type in ["Sonarr", "Whisparr"] else "$release",
-                "line2_default": "$number" if app_type in ["Sonarr", "Whisparr"] else "$runtime",
-                "line3_default": "$airdate" if app_type in ["Sonarr", "Whisparr"] else "$rating",
-                "line4_default": "$studio" if app_type in ["Sonarr", "Whisparr"] else "$genres",
-                "icon": "mdi:television" if app_type in ["Sonarr", "Whisparr"] else "mdi:movie",
+                "line1_default": "$episode"
+                if app_type in ["Sonarr", "Whisparr"]
+                else "$release",
+                "line2_default": "$number"
+                if app_type in ["Sonarr", "Whisparr"]
+                else "$runtime",
+                "line3_default": "$airdate"
+                if app_type in ["Sonarr", "Whisparr"]
+                else "$rating",
+                "line4_default": "$studio"
+                if app_type in ["Sonarr", "Whisparr"]
+                else "$genres",
+                "icon": "mdi:television"
+                if app_type in ["Sonarr", "Whisparr"]
+                else "mdi:movie",
             }
             if app_type == "Lidarr":
-                template.update({"line1_default": "$artist", "line2_default": "$album", "icon": "mdi:music"})
+                template |= {
+                    "line1_default": "$artist",
+                    "line2_default": "$album",
+                    "icon": "mdi:music",
+                }
             elif app_type == "Readarr":
-                template.update({"line1_default": "$author", "line2_default": "$release", "icon": "mdi:book"})
-            
+                template |= {
+                    "line1_default": "$author",
+                    "line2_default": "$release",
+                    "icon": "mdi:book",
+                }
+
             items.append(template)
 
             for event in raw_data:

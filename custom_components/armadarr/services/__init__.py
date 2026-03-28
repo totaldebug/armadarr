@@ -22,6 +22,7 @@ from .handlers import (
     async_handle_lookup_series,
     async_handle_search_item,
     async_handle_search_missing,
+    async_handle_sync_indexers,
     async_handle_system_task,
 )
 from .schemas import (
@@ -85,6 +86,20 @@ async def async_setup_services(hass: HomeAssistant, app_type: str) -> None:
 
     # App-specific services
     app_services: dict[str, list[tuple[Any, ...]]] = {
+        "Prowlarr": [
+            (
+                "sync_indexers",
+                partial(async_handle_sync_indexers, hass),
+                SCHEMA_BASE,
+            ),
+        ],
+        "Dispatcharr": [
+            (
+                "sync_indexers",
+                partial(async_handle_sync_indexers, hass),
+                SCHEMA_BASE,
+            ),
+        ],
         "Sonarr": [
             (
                 "add_series",

@@ -11,6 +11,7 @@ from homeassistant.helpers import selector
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from pyarr import (
     AsyncBazarr,
+    AsyncDispatcharr,
     AsyncLidarr,
     AsyncProwlarr,
     AsyncRadarr,
@@ -33,11 +34,17 @@ from .const import (
     LOGGER,
 )
 
+MEDIA_APPS = ["Sonarr", "Radarr", "Lidarr", "Readarr", "Whisparr"]
+
 
 class ArmadarrFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     """Config flow for Armadarr."""
 
     VERSION = 1
+
+    def __init__(self) -> None:
+        """Initialize."""
+        self._config: dict[str, Any] = {}
 
     async def async_step_user(
         self,
@@ -57,14 +64,11 @@ class ArmadarrFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                 LOGGER.error(exception)
                 _errors["base"] = "connection"
             else:
-                await self.async_set_unique_id(
-                    unique_id=f"{user_input[CONF_APP_TYPE]}_{user_input[CONF_URL]}"
-                )
-                self._abort_if_unique_id_configured()
-                return self.async_create_entry(
-                    title=f"{user_input[CONF_APP_TYPE]} ({user_input[CONF_URL]})",
-                    data=user_input,
-                )
+                self._config = user_input
+                if user_input[CONF_APP_TYPE] in MEDIA_APPS:
+                    return await self.async_step_options()
+
+                return self._async_create_entry()
 
         return self.async_show_form(
             step_id="user",
@@ -89,6 +93,24 @@ class ArmadarrFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     vol.Optional(
                         CONF_VERIFY_SSL, default=True
                     ): selector.BooleanSelector(),
+                },
+            ),
+            errors=_errors,
+        )
+
+    async def async_step_options(
+        self,
+        user_input: dict[str, Any] | None = None,
+    ) -> config_entries.ConfigFlowResult:
+        """Handle options step."""
+        if user_input is not None:
+            self._config.update(user_input)
+            return self._async_create_entry()
+
+        return self.async_show_form(
+            step_id="options",
+            data_schema=vol.Schema(
+                {
                     vol.Optional(
                         CONF_UPCOMING_DAYS, default=DEFAULT_UPCOMING_DAYS
                     ): selector.NumberSelector(
@@ -105,7 +127,13 @@ class ArmadarrFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
                     ),
                 },
             ),
-            errors=_errors,
+        )
+
+    def _async_create_entry(self) -> config_entries.ConfigFlowResult:
+        """Create the config entry."""
+        return self.async_create_entry(
+            title=f"{self._config[CONF_APP_TYPE]} ({self._config[CONF_URL]})",
+            data=self._config,
         )
 
     @staticmethod
@@ -151,6 +179,10 @@ class ArmadarrFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             client = AsyncBazarr(
                 host=url, api_key=api_key, session=session, verify_ssl=verify_ssl
             )
+        elif app_type == "Dispatcharr":
+            client = AsyncDispatcharr(
+                host=url, api_key=api_key, session=session, verify_ssl=verify_ssl
+            )
         elif app_type == "Whisparr":
             client = AsyncWhisparr(
                 host=url, api_key=api_key, session=session, verify_ssl=verify_ssl
@@ -173,9 +205,11 @@ class ArmadarrOptionsFlowHandler(config_entries.OptionsFlow):
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
 
-        return self.async_show_form(
-            step_id="init",
-            data_schema=vol.Schema(
+        app_type = self.config_entry.data.get(CONF_APP_TYPE)
+        schema_dict = {}
+
+        if app_type in MEDIA_APPS:
+            schema_dict.update(
                 {
                     vol.Optional(
                         CONF_UPCOMING_DAYS,
@@ -204,5 +238,12 @@ class ArmadarrOptionsFlowHandler(config_entries.OptionsFlow):
                         )
                     ),
                 }
-            ),
+            )
+
+        if not schema_dict:
+            return self.async_create_entry(title="", data={})
+
+        return self.async_show_form(
+            step_id="init",
+            data_schema=vol.Schema(schema_dict),
         )

@@ -181,7 +181,7 @@ def get_app_specific_sensors(app_type: str) -> list[ArmadarrSensorEntityDescript
                 name="Indexer Count",
                 icon="mdi:format-list-bulleted",
                 state_class=SensorStateClass.MEASUREMENT,
-                value_fn=lambda data: len(data.get("indexers", [])) if data else 0,
+                value_fn=lambda data: len(data.get("indexer_status", [])) if data else 0,
             ),
             ArmadarrSensorEntityDescription(
                 key="indexer_errors",
@@ -199,6 +199,16 @@ def get_app_specific_sensors(app_type: str) -> list[ArmadarrSensorEntityDescript
                     if data
                     else 0
                 ),
+            ),
+        ]
+    if app_type == "Dispatcharr":
+        return [
+            ArmadarrSensorEntityDescription(
+                key="indexer_count",
+                name="Indexer Count",
+                icon="mdi:format-list-bulleted",
+                state_class=SensorStateClass.MEASUREMENT,
+                value_fn=lambda data: len(data.get("indexer_status", [])) if data else 0,
             ),
         ]
     return []

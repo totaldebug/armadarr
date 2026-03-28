@@ -317,3 +317,10 @@ async def async_handle_search_item(hass: HomeAssistant, call: ServiceCall) -> No
         await client.command.execute(name="ArtistSearch", artistIds=[item_id])
     elif app_type == "Readarr":
         await client.command.execute(name="AuthorSearch", authorIds=[item_id])
+
+
+async def async_handle_sync_indexers(hass: HomeAssistant, call: ServiceCall) -> None:
+    """Handle sync indexers service call."""
+    entry_id = call.data["entry_id"]
+    client = await async_get_client(hass, entry_id)
+    await client.command.execute(name="AppIndexerSync")

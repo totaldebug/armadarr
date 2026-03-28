@@ -9,6 +9,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.loader import async_get_loaded_integration
 from pyarr import (
     AsyncBazarr,
+    AsyncDispatcharr,
     AsyncLidarr,
     AsyncProwlarr,
     AsyncRadarr,
@@ -83,6 +84,10 @@ async def async_setup_entry(
         )
     elif app_type == "Bazarr":
         client = AsyncBazarr(
+            host=url, api_key=api_key, session=session, verify_ssl=verify_ssl
+        )
+    elif app_type == "Dispatcharr":
+        client = AsyncDispatcharr(
             host=url, api_key=api_key, session=session, verify_ssl=verify_ssl
         )
     elif app_type == "Whisparr":

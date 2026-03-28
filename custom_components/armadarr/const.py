@@ -24,4 +24,5 @@ APP_TYPES = [
     "Prowlarr",
     "Bazarr",
     "Whisparr",
+    "Dispatcharr",
 ]

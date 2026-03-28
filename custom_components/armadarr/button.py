@@ -55,7 +55,7 @@ async def async_setup_entry(
         ),
     ]
 
-    if app_type == "Prowlarr":
+    if app_type in ["Prowlarr", "Dispatcharr"]:
         entities.append(
             ArmadarrButton(
                 coordinator,

@@ -1859,7 +1859,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "homeassistant", specifier = ">=2026.2.3" },
-    { name = "pyarr", specifier = "==6.4.0" },
+    { name = "pyarr", specifier = ">=6.4.0" },
 ]
 
 [package.metadata.requires-dev]

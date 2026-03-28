@@ -58,12 +58,14 @@ class StandardCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
         try:
             # Common data for most apps
-            if app_type not in ["Bazarr", "Prowlarr"]:
+            if app_type not in ["Bazarr"]:
+                data["system_status"] = await client.system.get_status()
+
+            if app_type not in ["Bazarr", "Prowlarr", "Dispatcharr"]:
                 data["queue"] = await client.queue.get()
                 data["health"] = await client.system.get_health()
                 data["root_folder"] = await client.root_folder.get()
                 data["quality_profile"] = await client.quality_profile.get()
-                data["system_status"] = await client.system.get_status()
 
                 # Fetch history for events
                 history = await client.history.get(page=1, page_size=10)
@@ -111,7 +113,7 @@ class StandardCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 with contextlib.suppress(Exception):
                     data["system_status"] = await client.system.get_status()
 
-            if app_type == "Prowlarr":
+            if app_type in ["Prowlarr", "Dispatcharr"]:
                 data["indexer_status"] = await client.indexer.get()
 
         except Exception as exception:
@@ -174,8 +176,6 @@ class DailyCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 data["unmonitored_count"] = sum(
                     1 for a in data["authors"] if not a.get("monitored")
                 )
-            elif app_type == "Prowlarr":
-                data["indexers"] = await client.indexer_proxy.get()
 
             if app_type in ["Sonarr", "Whisparr", "Radarr", "Lidarr", "Readarr"]:
                 # Fetch missing count

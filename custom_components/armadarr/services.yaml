@@ -313,3 +313,15 @@ search_item:
       selector:
         number:
           mode: box
+
+sync_indexers:
+  name: Sync Indexers
+  description: Trigger an indexer sync for Prowlarr or Dispatcharr.
+  fields:
+    entry_id:
+      name: Integration ID
+      description: The ID of the Armadarr integration.
+      required: true
+      selector:
+        config_entry:
+          integration: armadarr
