@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.2.0](https://github.com/totaldebug/armadarr/compare/v0.1.1...v0.2.0) (2026-03-31)
+
+
+### Features
+
+* **prowlarr:** add new sensors for indexer stats ([b7f5030](https://github.com/totaldebug/armadarr/commit/b7f50302ac0c401a06ad370dffe486d151680c42))
+
+
+### Bug Fixes
+
+* **dispatcharr:** unable to connect and verify status ([8f1c9ec](https://github.com/totaldebug/armadarr/commit/8f1c9ece203e7dd1ede1491f0e34d575c18b2137))
+
 ## [0.1.1](https://github.com/totaldebug/armadarr/compare/v0.1.0...v0.1.1) (2026-03-28)
 
 
