@@ -12,7 +12,7 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pytest>=8.3.4",
-    "pytest-homeassistant-custom-component>=0.13.204",
+    "pytest-homeassistant-custom-component>=0.13.323",
     "pytest-asyncio>=0.25.3",
     "pytest-cov>=6.0.0",
     "pre-commit>=4.1.0",
