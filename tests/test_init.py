@@ -7,4 +7,4 @@ from custom_components.armadarr.const import DOMAIN
 
 async def test_setup() -> None:
     """Test setup of the integration."""
-    assert DOMAIN == "armadarr"  # noqa: S101
+    assert DOMAIN == "armadarr"
