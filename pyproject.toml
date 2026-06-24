@@ -3,9 +3,9 @@ name = "armadarr"
 version = "0.2.0"
 description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.14.2"
 dependencies = [
-    "homeassistant>=2026.2.3",
+    "homeassistant>=2026.6.0",
     "pyarr==6.6.0",
 ]
 
