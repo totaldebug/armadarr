@@ -1,0 +1,116 @@
+blueprint:
+  name: "Armadarr: Refresh profiles & root folders"
+  description: >
+    Populate quality-profile, root-folder and (Lidarr/Readarr) metadata-profile
+    dropdown helpers from the live config of an Armadarr instance via the
+    `armadarr.get_config_data` action. Run this once per instance, and again
+    whenever you add or change profiles/root folders in the *arr app.
+
+    The dropdown options are written as `Name (id)` for profiles and as the raw
+    path for root folders; the companion "add" blueprints parse these back into
+    the IDs/paths the add actions expect.
+  domain: script
+  homeassistant:
+    min_version: "2024.1.0"
+  source_url: https://github.com/totaldebug/armadarr/blob/main/blueprints/script/armadarr/refresh_profiles.yaml
+  input:
+    armadarr_entry:
+      name: Armadarr instance
+      description: The Armadarr integration entry to read config from.
+      selector:
+        config_entry:
+          integration: armadarr
+    quality_helper:
+      name: Quality profile dropdown
+      description: An input_select to fill with this instance's quality profiles.
+      selector:
+        entity:
+          filter:
+            domain: input_select
+    root_helper:
+      name: Root folder dropdown
+      description: An input_select to fill with this instance's root folders.
+      selector:
+        entity:
+          filter:
+            domain: input_select
+    metadata_helper:
+      name: Metadata profile dropdown (Lidarr/Readarr only)
+      description: >
+        Optional. An input_select to fill with metadata profiles. Leave empty
+        for Sonarr/Radarr instances, which have no metadata profiles.
+      default: ""
+      selector:
+        entity:
+          filter:
+            domain: input_select
+
+mode: single
+icon: mdi:cloud-refresh
+
+sequence:
+  - variables:
+      quality_entity: !input quality_helper
+      root_entity: !input root_helper
+      metadata_entity: !input metadata_helper
+  - action: armadarr.get_config_data
+    data:
+      entry_id: !input armadarr_entry
+    response_variable: cfg
+  - variables:
+      quality_options: >
+        {% set ns = namespace(items=[]) %}
+        {% for q in cfg.data.quality_profiles | default([]) %}
+        {% set ns.items = ns.items + [q.name ~ ' (' ~ q.id | string ~ ')'] %}
+        {% endfor %}
+        {{ ns.items if ns.items | length > 0 else ['No profiles found'] }}
+      root_options: >
+        {% set ns = namespace(items=[]) %}
+        {% for r in cfg.data.root_folders | default([]) %}
+        {% set ns.items = ns.items + [r.path] %}
+        {% endfor %}
+        {{ ns.items if ns.items | length > 0 else ['No root folders found'] }}
+  - action: input_select.set_options
+    target:
+      entity_id: "{{ quality_entity }}"
+    data:
+      options: "{{ quality_options }}"
+  - action: input_select.select_option
+    target:
+      entity_id: "{{ quality_entity }}"
+    data:
+      option: "{{ quality_options[0] }}"
+  - action: input_select.set_options
+    target:
+      entity_id: "{{ root_entity }}"
+    data:
+      options: "{{ root_options }}"
+  - action: input_select.select_option
+    target:
+      entity_id: "{{ root_entity }}"
+    data:
+      option: "{{ root_options[0] }}"
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: >
+              {{ metadata_entity not in ['', none]
+                 and cfg.data.metadata_profiles is defined }}
+        sequence:
+          - variables:
+              metadata_options: >
+                {% set ns = namespace(items=[]) %}
+                {% for m in cfg.data.metadata_profiles | default([]) %}
+                {% set ns.items = ns.items + [m.name ~ ' (' ~ m.id | string ~ ')'] %}
+                {% endfor %}
+                {{ ns.items if ns.items | length > 0 else ['No profiles found'] }}
+          - action: input_select.set_options
+            target:
+              entity_id: "{{ metadata_entity }}"
+            data:
+              options: "{{ metadata_options }}"
+          - action: input_select.select_option
+            target:
+              entity_id: "{{ metadata_entity }}"
+            data:
+              option: "{{ metadata_options[0] }}"

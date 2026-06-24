@@ -1,0 +1,93 @@
+blueprint:
+  name: "Armadarr: Lookup author (Readarr)"
+  description: >
+    Search for an author via `armadarr.lookup_author` and write the matches into
+    a dropdown helper as `Name (foreignAuthorId)`. Pair with the "Add author"
+    blueprint, which reads the selected option. Note the ID is a string, not a
+    number.
+  domain: script
+  homeassistant:
+    min_version: "2024.1.0"
+  source_url: https://github.com/totaldebug/armadarr/blob/main/blueprints/script/armadarr/lookup_author.yaml
+  input:
+    armadarr_entry:
+      name: Armadarr instance (Readarr)
+      description: The Armadarr Readarr integration entry.
+      selector:
+        config_entry:
+          integration: armadarr
+    search_helper:
+      name: Search term helper
+      description: An input_text holding the author name to search for.
+      selector:
+        entity:
+          filter:
+            domain: input_text
+    result_helper:
+      name: Result dropdown
+      description: An input_select to fill with the search matches.
+      selector:
+        entity:
+          filter:
+            domain: input_select
+    max_results:
+      name: Maximum results
+      description: How many matches to show in the dropdown.
+      default: 25
+      selector:
+        number:
+          min: 1
+          max: 50
+          mode: slider
+
+mode: restart
+icon: mdi:magnify
+
+sequence:
+  - variables:
+      search_entity: !input search_helper
+      result_entity: !input result_helper
+      limit: !input max_results
+  - action: armadarr.lookup_author
+    data:
+      entry_id: !input armadarr_entry
+      term: "{{ states(search_entity) }}"
+    response_variable: lookup
+  - choose:
+      - conditions:
+          - condition: template
+            value_template: "{{ lookup.data is defined and lookup.data | length > 0 }}"
+        sequence:
+          - variables:
+              options: >
+                {% set ns = namespace(items=[]) %}
+                {% for item in lookup.data[:limit | int] %}
+                {% set ns.items = ns.items + [item.authorName ~ ' (' ~ item.foreignAuthorId ~ ')'] %}
+                {% endfor %}
+                {{ ns.items }}
+          - action: input_select.set_options
+            target:
+              entity_id: "{{ result_entity }}"
+            data:
+              options: "{{ options }}"
+          - action: input_select.select_option
+            target:
+              entity_id: "{{ result_entity }}"
+            data:
+              option: "{{ options[0] }}"
+    default:
+      - action: input_select.set_options
+        target:
+          entity_id: "{{ result_entity }}"
+        data:
+          options:
+            - No results
+      - action: input_select.select_option
+        target:
+          entity_id: "{{ result_entity }}"
+        data:
+          option: No results
+      - action: persistent_notification.create
+        data:
+          title: Armadarr lookup author
+          message: "No authors found for '{{ states(search_entity) }}'."

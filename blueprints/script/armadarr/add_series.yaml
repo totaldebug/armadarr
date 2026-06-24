@@ -1,0 +1,77 @@
+blueprint:
+  name: "Armadarr: Add series (Sonarr)"
+  description: >
+    Add the series currently selected in the result dropdown to Sonarr via
+    `armadarr.add_series`, using the quality profile and root folder selected
+    in their dropdowns. Run "Lookup series" first to populate the result
+    dropdown, and "Refresh profiles & root folders" to populate the others.
+  domain: script
+  homeassistant:
+    min_version: "2024.1.0"
+  source_url: https://github.com/totaldebug/armadarr/blob/main/blueprints/script/armadarr/add_series.yaml
+  input:
+    armadarr_entry:
+      name: Armadarr instance (Sonarr)
+      description: The Armadarr Sonarr integration entry.
+      selector:
+        config_entry:
+          integration: armadarr
+    result_helper:
+      name: Result dropdown
+      description: The input_select populated by "Lookup series".
+      selector:
+        entity:
+          filter:
+            domain: input_select
+    quality_helper:
+      name: Quality profile dropdown
+      description: The input_select populated by "Refresh profiles & root folders".
+      selector:
+        entity:
+          filter:
+            domain: input_select
+    root_helper:
+      name: Root folder dropdown
+      description: The input_select populated by "Refresh profiles & root folders".
+      selector:
+        entity:
+          filter:
+            domain: input_select
+
+mode: single
+icon: mdi:television-plus
+
+sequence:
+  - variables:
+      result_entity: !input result_helper
+      quality_entity: !input quality_helper
+      root_entity: !input root_helper
+      selected: "{{ states(result_entity) }}"
+      tvdb_id: "{{ selected | regex_findall('\\(([^)]+)\\)$') | first | default('', true) }}"
+      quality_id: "{{ states(quality_entity) | regex_findall('\\((\\d+)\\)$') | first | default('', true) }}"
+      root_path: "{{ states(root_entity) }}"
+  - if:
+      - condition: template
+        value_template: >
+          {{ selected in ['No results', 'unknown', 'unavailable', '']
+             or not tvdb_id | int(0)
+             or not quality_id | int(0)
+             or root_path in ['unknown', 'unavailable', '', 'No root folders found'] }}
+    then:
+      - action: persistent_notification.create
+        data:
+          title: Armadarr add series
+          message: >
+            Pick a valid series, quality profile and root folder first
+            (run Lookup series and Refresh profiles).
+    else:
+      - action: armadarr.add_series
+        data:
+          entry_id: !input armadarr_entry
+          tvdb_id: "{{ tvdb_id | int }}"
+          quality_profile_id: "{{ quality_id | int }}"
+          root_folder_path: "{{ root_path }}"
+      - action: persistent_notification.create
+        data:
+          title: Armadarr add series
+          message: "Added {{ selected }} to Sonarr."

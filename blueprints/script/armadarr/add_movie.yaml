@@ -1,0 +1,77 @@
+blueprint:
+  name: "Armadarr: Add movie (Radarr)"
+  description: >
+    Add the movie currently selected in the result dropdown to Radarr via
+    `armadarr.add_movie`, using the quality profile and root folder selected in
+    their dropdowns. Run "Lookup movie" first to populate the result dropdown,
+    and "Refresh profiles & root folders" to populate the others.
+  domain: script
+  homeassistant:
+    min_version: "2024.1.0"
+  source_url: https://github.com/totaldebug/armadarr/blob/main/blueprints/script/armadarr/add_movie.yaml
+  input:
+    armadarr_entry:
+      name: Armadarr instance (Radarr)
+      description: The Armadarr Radarr integration entry.
+      selector:
+        config_entry:
+          integration: armadarr
+    result_helper:
+      name: Result dropdown
+      description: The input_select populated by "Lookup movie".
+      selector:
+        entity:
+          filter:
+            domain: input_select
+    quality_helper:
+      name: Quality profile dropdown
+      description: The input_select populated by "Refresh profiles & root folders".
+      selector:
+        entity:
+          filter:
+            domain: input_select
+    root_helper:
+      name: Root folder dropdown
+      description: The input_select populated by "Refresh profiles & root folders".
+      selector:
+        entity:
+          filter:
+            domain: input_select
+
+mode: single
+icon: mdi:movie-plus
+
+sequence:
+  - variables:
+      result_entity: !input result_helper
+      quality_entity: !input quality_helper
+      root_entity: !input root_helper
+      selected: "{{ states(result_entity) }}"
+      tmdb_id: "{{ selected | regex_findall('\\(([^)]+)\\)$') | first | default('', true) }}"
+      quality_id: "{{ states(quality_entity) | regex_findall('\\((\\d+)\\)$') | first | default('', true) }}"
+      root_path: "{{ states(root_entity) }}"
+  - if:
+      - condition: template
+        value_template: >
+          {{ selected in ['No results', 'unknown', 'unavailable', '']
+             or not tmdb_id | int(0)
+             or not quality_id | int(0)
+             or root_path in ['unknown', 'unavailable', '', 'No root folders found'] }}
+    then:
+      - action: persistent_notification.create
+        data:
+          title: Armadarr add movie
+          message: >
+            Pick a valid movie, quality profile and root folder first
+            (run Lookup movie and Refresh profiles).
+    else:
+      - action: armadarr.add_movie
+        data:
+          entry_id: !input armadarr_entry
+          tmdb_id: "{{ tmdb_id | int }}"
+          quality_profile_id: "{{ quality_id | int }}"
+          root_folder_path: "{{ root_path }}"
+      - action: persistent_notification.create
+        data:
+          title: Armadarr add movie
+          message: "Added {{ selected }} to Radarr."

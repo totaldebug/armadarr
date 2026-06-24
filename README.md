@@ -51,6 +51,7 @@
     <li><a href="#installation">Installation</a></li>
     <li><a href="#configuration">Configuration</a></li>
     <li><a href="#services">Services</a></li>
+    <li><a href="#blueprints">Blueprints</a></li>
     <li><a href="#usage-tips">Usage Tips</a></li>
     <li><a href="#contributing">Contributing</a></li>
     <li><a href="#license">License</a></li>
@@ -171,6 +172,21 @@ These services return the raw search results from the application, useful for fi
 - **`armadarr.lookup_movie`**: Search for movies on TMDB.
 - **`armadarr.lookup_artist`**: Search for artists on MusicBrainz.
 - **`armadarr.lookup_author`**: Search for authors on Readarr.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+<!-- BLUEPRINTS -->
+## Blueprints
+
+Ready-made [Home Assistant script blueprints](blueprints/README.md) let you search for and add media to Sonarr, Radarr, Lidarr, and Readarr straight from a dashboard, building on the lookup and add services above. Quality profiles, root folders, and metadata profiles are populated dynamically from each instance, so there are no IDs to hardcode.
+
+Import a blueprint via **Settings** > **Automations & scenes** > **Blueprints** > **Import Blueprint** using its raw URL, for example:
+
+```
+https://github.com/totaldebug/armadarr/blob/main/blueprints/script/armadarr/lookup_series.yaml
+```
+
+See the [blueprints guide](blueprints/README.md) for the full list, helper setup, and an example dashboard card.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
