@@ -263,6 +263,47 @@ wheels = [
 ]
 
 [[package]]
+name = "armadarr"
+version = "0.2.0"
+source = { virtual = "." }
+dependencies = [
+    { name = "homeassistant", version = "2026.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14.2'" },
+    { name = "homeassistant", version = "2026.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14.2'" },
+    { name = "pyarr" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "interrogate" },
+    { name = "mypy" },
+    { name = "pre-commit" },
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+    { name = "pytest-cov" },
+    { name = "pytest-homeassistant-custom-component", version = "0.13.316", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14.2'" },
+    { name = "pytest-homeassistant-custom-component", version = "0.13.319", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14.2'" },
+    { name = "ruff" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "homeassistant", specifier = ">=2026.2.3" },
+    { name = "pyarr", specifier = "==6.6.0" },
+]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "interrogate", specifier = ">=1.7.0" },
+    { name = "mypy", specifier = ">=1.15.0" },
+    { name = "pre-commit", specifier = ">=4.1.0" },
+    { name = "pytest", specifier = ">=8.3.4" },
+    { name = "pytest-asyncio", specifier = ">=0.25.3" },
+    { name = "pytest-cov", specifier = ">=6.0.0" },
+    { name = "pytest-homeassistant-custom-component", specifier = ">=0.13.204" },
+    { name = "ruff", specifier = ">=0.9.6" },
+]
+
+[[package]]
 name = "astral"
 version = "2.2"
 source = { registry = "https://pypi.org/simple" }
@@ -1831,47 +1872,6 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/ed/13/ce6706718c7e8422e02055c95bf503a810cea9e1c0b2357f75b644f2b88f/pyarr-6.6.0.tar.gz", hash = "sha256:ac140009db794b536d621548b674e55cb0ac3b63221807700420234fbee76f23", size = 62588, upload-time = "2026-03-31T10:36:44.907Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/db/26/88b0a98c8c5470f20e3d12571f31325b502fd1403be71447a01e53fb0255/pyarr-6.6.0-py3-none-any.whl", hash = "sha256:f361dd0c295072225681c3e76861926010d042f9930aaccbdbbbe72cddfa8f0f", size = 160366, upload-time = "2026-03-31T10:36:43.89Z" },
-]
-
-[[package]]
-name = "pyarr-manager"
-version = "0.1.1"
-source = { virtual = "." }
-dependencies = [
-    { name = "homeassistant", version = "2026.2.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14.2'" },
-    { name = "homeassistant", version = "2026.3.3", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14.2'" },
-    { name = "pyarr" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "interrogate" },
-    { name = "mypy" },
-    { name = "pre-commit" },
-    { name = "pytest" },
-    { name = "pytest-asyncio" },
-    { name = "pytest-cov" },
-    { name = "pytest-homeassistant-custom-component", version = "0.13.316", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.14.2'" },
-    { name = "pytest-homeassistant-custom-component", version = "0.13.319", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.14.2'" },
-    { name = "ruff" },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "homeassistant", specifier = ">=2026.2.3" },
-    { name = "pyarr", specifier = "==6.6.0" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "interrogate", specifier = ">=1.7.0" },
-    { name = "mypy", specifier = ">=1.15.0" },
-    { name = "pre-commit", specifier = ">=4.1.0" },
-    { name = "pytest", specifier = ">=8.3.4" },
-    { name = "pytest-asyncio", specifier = ">=0.25.3" },
-    { name = "pytest-cov", specifier = ">=6.0.0" },
-    { name = "pytest-homeassistant-custom-component", specifier = ">=0.13.204" },
-    { name = "ruff", specifier = ">=0.9.6" },
 ]
 
 [[package]]

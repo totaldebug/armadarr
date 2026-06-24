@@ -1,5 +1,5 @@
 [project]
-name = "pyarr-manager"
+name = "armadarr"
 version = "0.2.0"
 description = "Add your description here"
 readme = "README.md"
