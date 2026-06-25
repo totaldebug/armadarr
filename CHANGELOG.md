@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.3.0](https://github.com/totaldebug/armadarr/compare/v0.2.0...v0.3.0) (2026-06-25)
+
+
+### Features
+
+* **blueprints:** add Home Assistant script blueprints ([78d4e17](https://github.com/totaldebug/armadarr/commit/78d4e177f734c4fe3b1854c03680215736aeca2e))
+
+
+### Bug Fixes
+
+* **deps:** bump Home Assistant to &gt;=2026.6.0 to patch vulnerabilities ([fdb0ca1](https://github.com/totaldebug/armadarr/commit/fdb0ca1dc4dfa547b43504ecdf7e52b0bee28aa3))
+* rename package metadata to armadarr ([efc4dbe](https://github.com/totaldebug/armadarr/commit/efc4dbea7bf22d68c85f4a115ab05aa7d6f8c4f6))
+
 ## [0.2.0](https://github.com/totaldebug/armadarr/compare/v0.1.1...v0.2.0) (2026-03-31)
 
 
