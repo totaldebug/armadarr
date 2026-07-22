@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.3.1](https://github.com/totaldebug/armadarr/compare/v0.3.0...v0.3.1) (2026-07-22)
+
+
+### Bug Fixes
+
+* honour verify_ssl by requesting matching HA client session ([63823ae](https://github.com/totaldebug/armadarr/commit/63823aec6e460599a162eb596bf9b8a6ccd4f6c4))
+* honour verify_ssl by requesting matching HA client session ([e86acbd](https://github.com/totaldebug/armadarr/commit/e86acbd5b57a8dfe4eeb74dd4dba2d6fb70ace19))
+
 ## [0.3.0](https://github.com/totaldebug/armadarr/compare/v0.2.0...v0.3.0) (2026-06-25)
 
 
