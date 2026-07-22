@@ -1,11 +1,13 @@
 """Test Armadarr config flow."""
 
-from unittest.mock import patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
+import pytest
 from homeassistant import config_entries, data_entry_flow
 from homeassistant.core import HomeAssistant
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
+from custom_components.armadarr.config_flow import ArmadarrFlowHandler
 from custom_components.armadarr.const import (
     CONF_API_KEY,
     CONF_APP_TYPE,
@@ -166,3 +168,41 @@ async def test_options_flow_prowlarr(hass: HomeAssistant) -> None:
     # Should create entry immediately as there are no options
     assert result["type"] == data_entry_flow.FlowResultType.CREATE_ENTRY
     assert result["data"] == {}
+
+
+@pytest.mark.parametrize("verify_ssl", [True, False])
+async def test_test_connection_passes_verify_ssl_to_session(
+    hass: HomeAssistant, verify_ssl: bool
+) -> None:
+    """
+    The verify_ssl choice must reach async_get_clientsession.
+
+    pyarr only honours verify_ssl when it creates its own session; when a
+    caller-supplied session is injected the flag is ignored. So the toggle only
+    takes effect if we request the correctly-configured session from Home
+    Assistant. Regression test for the "Verify SSL disabled but still get
+    SSLCertVerificationError" report.
+    """
+    handler = ArmadarrFlowHandler()
+    handler.hass = hass
+
+    mock_client = MagicMock()
+    mock_client.system.get_status = AsyncMock(return_value={})
+
+    with (
+        patch(
+            "custom_components.armadarr.config_flow.async_get_clientsession"
+        ) as mock_get_session,
+        patch(
+            "custom_components.armadarr.config_flow.AsyncRadarr",
+            return_value=mock_client,
+        ),
+    ):
+        await handler._test_connection(
+            app_type="Radarr",
+            url="https://home.lc/radarr",
+            api_key="test-api-key",
+            verify_ssl=verify_ssl,
+        )
+
+    mock_get_session.assert_called_once_with(hass, verify_ssl=verify_ssl)
