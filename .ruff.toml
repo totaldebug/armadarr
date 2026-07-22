@@ -16,8 +16,9 @@ ignore = [
 ]
 
 [lint.per-file-ignores]
-# Tests use asserts, pytest fixtures as arguments, and runtime-only imports.
-"tests/**" = ["S101", "ARG", "TC002"]
+# Tests use asserts, pytest fixtures as arguments, runtime-only imports,
+# boolean parametrize params, and access private members under test.
+"tests/**" = ["S101", "ARG", "TC002", "FBT001", "SLF001"]
 
 [lint.flake8-pytest-style]
 fixture-parentheses = false
