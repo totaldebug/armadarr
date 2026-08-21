@@ -47,7 +47,7 @@ async def async_handle_search_missing(hass: HomeAssistant, call: ServiceCall) ->
     app_type = entry.data["app_type"]
 
     command = "MissingSeriesSearch"
-    if app_type == "Radarr":
+    if app_type in ["Radarr", "Whisparr"]:
         command = "MissingMoviesSearch"
     elif app_type == "Lidarr":
         command = "ArtistSearch"
@@ -273,11 +273,11 @@ async def async_handle_get_config_data(
     app_type = entry.data["app_type"]
 
     data: dict[str, Any] = {}
-    if app_type not in ["Bazarr", "Prowlarr"]:
+    if app_type not in ["Bazarr", "Prowlarr", "Dispatcharr"]:
         data["root_folders"] = await client.root_folder.get()
         data["quality_profiles"] = await client.quality_profile.get()
 
-    if app_type in ["Lidarr", "Readarr"]:
+    if app_type == "Readarr":
         data["metadata_profiles"] = await client.metadata_profile.get()
 
     return {"data": data}
@@ -306,9 +306,9 @@ async def async_handle_search_item(hass: HomeAssistant, call: ServiceCall) -> No
     client = entry.runtime_data.client
     app_type = entry.data["app_type"]
 
-    if app_type in ["Sonarr", "Whisparr"]:
+    if app_type == "Sonarr":
         await client.command.execute(name="EpisodeSearch", episodeIds=[item_id])
-    elif app_type == "Radarr":
+    elif app_type in ["Radarr", "Whisparr"]:
         await client.command.execute(name="MovieSearch", movieIds=[item_id])
     elif app_type == "Lidarr":
         await client.command.execute(name="ArtistSearch", artistIds=[item_id])

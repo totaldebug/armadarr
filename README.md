@@ -80,8 +80,8 @@ For the best results, it is recommended to use the [Armadarr Card](https://githu
 ## Features
 
 ### Supported Applications
-- **Sonarr / Whisparr**: TV series management.
-- **Radarr**: Movie management.
+- **Sonarr**: TV series management.
+- **Radarr / Whisparr**: Movie management.
 - **Lidarr**: Music management.
 - **Readarr**: Book management.
 - **Prowlarr**: Indexer management.
@@ -100,13 +100,14 @@ For the best results, it is recommended to use the [Armadarr Card](https://githu
   - **Connectivity**: Monitor if the application is reachable.
   - **Update Available**: Alerts when a new version of the application is available.
 - **Buttons**:
-  - **Restart Application**: Remotely restart the service.
-  - **Backup Now**: Trigger an immediate system backup.
+  - **Restart Application**: Remotely restart the service. Not offered for Dispatcharr, which has no restart endpoint.
+  - **Backup Now**: Trigger an immediate system backup. Not offered for Bazarr, which has no backup endpoint.
   - **Sync App Indexers**: (Prowlarr only) Trigger a sync of indexers to applications.
-  - **Search Missing Subtitles**: (Bazarr only) Trigger a search for missing subtitles.
+  - **Reload Plugins**: (Dispatcharr only) Reload the installed plugins.
+  - **Search Missing Subtitles**: (Bazarr only) Search for every wanted series and movie subtitle.
 - **Calendar**:
   - **Upcoming Media**: View upcoming air dates and release dates directly in the Home Assistant calendar.
-  - **Enhanced Titles**: Sonarr/Whisparr events show both the Show Name and Episode Title (e.g., "The Mandalorian - Chapter 1").
+  - **Enhanced Titles**: Sonarr events show both the Show Name and Episode Title (e.g., "The Mandalorian - Chapter 1").
 
 ### Events
 - **`armadarr_history_event`**: Fired when a new record appears in the application history (e.g., download completed, grabbed, failed).
@@ -160,8 +161,8 @@ Armadarr provides several services to control your applications. Services are co
 ### Media Management Services
 These services allow you to add new content to your library. If an ID is not provided, the integration will attempt to look up the item by title. If multiple matches are found, an error will be raised listing the options.
 
-- **`armadarr.add_series`**: Add a new series to Sonarr/Whisparr.
-- **`armadarr.add_movie`**: Add a new movie to Radarr.
+- **`armadarr.add_series`**: Add a new series to Sonarr.
+- **`armadarr.add_movie`**: Add a new movie to Radarr or Whisparr.
 - **`armadarr.add_artist`**: Add a new artist to Lidarr.
 - **`armadarr.add_author`**: Add a new author to Readarr.
 
@@ -178,7 +179,9 @@ These services return the raw search results from the application, useful for fi
 <!-- BLUEPRINTS -->
 ## Blueprints
 
-Ready-made [Home Assistant script blueprints](blueprints/README.md) let you search for and add media to Sonarr, Radarr, Lidarr, and Readarr straight from a dashboard, building on the lookup and add services above. Quality profiles, root folders, and metadata profiles are populated dynamically from each instance, so there are no IDs to hardcode.
+Ready-made [Home Assistant script blueprints](blueprints/README.md) let you search for and add media to Sonarr, Radarr, Lidarr, and Readarr straight from a dashboard, building on the lookup and add services above.
+Quality profiles and root folders are populated dynamically from each instance, so there are no IDs to hardcode.
+Metadata profiles are populated for Readarr only, because pyarr does not yet expose Lidarr's metadata profiles - Lidarr's `metadata_profile_id` has to be supplied by hand.
 
 Import a blueprint via **Settings** > **Automations & scenes** > **Blueprints** > **Import Blueprint** using its raw URL, for example:
 

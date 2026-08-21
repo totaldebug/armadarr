@@ -121,9 +121,9 @@ class StandardCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         start = datetime.now(tz=UTC)
         end = start + timedelta(days=upcoming_days)
         kwargs = {}
-        if app_type in ["Sonarr", "Whisparr"]:
+        if app_type == "Sonarr":
             kwargs["includeSeries"] = True
-        elif app_type == "Radarr":
+        elif app_type in ["Radarr", "Whisparr"]:
             kwargs["includeMovie"] = True
         elif app_type == "Lidarr":
             kwargs["includeArtist"] = True
@@ -141,7 +141,6 @@ class StandardCoordinator(DataUpdateCoordinator[dict[str, Any]]):
     async def _fetch_dispatcharr(client: Any) -> dict[str, Any]:
         """Fetch all Dispatcharr-specific data."""
         return {
-            "indexer_status": await client.indexer.get(),
             "channels": await client.channels.get(),
             "streams": await client.streams.get(),
             "vod": await client.vod.get_all(),
@@ -190,12 +189,12 @@ class DailyCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         data: dict[str, Any] = {}
 
         try:
-            if app_type in ["Sonarr", "Whisparr"]:
+            if app_type == "Sonarr":
                 data["series"] = await client.series.get()
                 data["unmonitored_count"] = sum(
                     1 for s in data["series"] if not s.get("monitored")
                 )
-            elif app_type == "Radarr":
+            elif app_type in ["Radarr", "Whisparr"]:
                 data["movies"] = await client.movie.get()
                 data["unmonitored_count"] = sum(
                     1 for m in data["movies"] if not m.get("monitored")
@@ -218,9 +217,9 @@ class DailyCoordinator(DataUpdateCoordinator[dict[str, Any]]):
 
                 # Fetch wanted data
                 kwargs = {}
-                if app_type in ["Sonarr", "Whisparr"]:
+                if app_type == "Sonarr":
                     kwargs["includeSeries"] = True
-                elif app_type == "Radarr":
+                elif app_type in ["Radarr", "Whisparr"]:
                     kwargs["includeMovie"] = True
                 elif app_type == "Lidarr":
                     kwargs["includeArtist"] = True
@@ -230,9 +229,7 @@ class DailyCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 wanted_data = await client.wanted.get(
                     page=1,
                     page_size=wanted_count,
-                    sort_key="airDateUtc"
-                    if app_type in ["Sonarr", "Whisparr"]
-                    else "releaseDate",
+                    sort_key="airDateUtc" if app_type == "Sonarr" else "releaseDate",
                     sort_dir="descending",
                     **kwargs,
                 )

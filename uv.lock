@@ -248,7 +248,7 @@ wheels = [
 
 [[package]]
 name = "armadarr"
-version = "0.3.0"
+version = "0.3.1"
 source = { virtual = "." }
 dependencies = [
     { name = "homeassistant" },
@@ -270,7 +270,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "homeassistant", specifier = ">=2026.6.0" },
-    { name = "pyarr", specifier = "==6.6.0" },
+    { name = "pyarr", specifier = "==6.8.0" },
 ]
 
 [package.metadata.requires-dev]
@@ -1820,7 +1820,7 @@ wheels = [
 
 [[package]]
 name = "pyarr"
-version = "6.6.0"
+version = "6.8.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "backoff" },
@@ -1830,9 +1830,9 @@ dependencies = [
     { name = "types-requests" },
     { name = "yarl" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/ed/13/ce6706718c7e8422e02055c95bf503a810cea9e1c0b2357f75b644f2b88f/pyarr-6.6.0.tar.gz", hash = "sha256:ac140009db794b536d621548b674e55cb0ac3b63221807700420234fbee76f23", size = 62588, upload-time = "2026-03-31T10:36:44.907Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7e/e7/3b5863ce28d2cab580281bf01c7fddca721d7bf64707f05b2c33b37f013c/pyarr-6.8.0.tar.gz", hash = "sha256:d6a5c7a90019223d2ac5111fbbad0f161a3052e709bb8f66d2a2005255aeee1d", size = 69336, upload-time = "2026-08-21T18:49:05.863Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/db/26/88b0a98c8c5470f20e3d12571f31325b502fd1403be71447a01e53fb0255/pyarr-6.6.0-py3-none-any.whl", hash = "sha256:f361dd0c295072225681c3e76861926010d042f9930aaccbdbbbe72cddfa8f0f", size = 160366, upload-time = "2026-03-31T10:36:43.89Z" },
+    { url = "https://files.pythonhosted.org/packages/10/ff/5b9fe806e741105603b1c2e7c8298155b884d873f5e36f5753f7d72c8d19/pyarr-6.8.0-py3-none-any.whl", hash = "sha256:31c638317283ee4438f4cef4bef57ed3bf75a70cb51fab6ee8c0a78626d73f93", size = 173048, upload-time = "2026-08-21T18:49:04.71Z" },
 ]
 
 [[package]]
