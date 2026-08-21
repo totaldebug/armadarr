@@ -76,7 +76,7 @@ async def _stub_request(path: str, *_args: Any, **_kwargs: Any) -> Any:
     the stub has to hand back a list where a list is expected. Only calendar
     differs among the endpoints the coordinators touch.
     """
-    if "calendar" in path:
+    if "calendar" in path or path == "update":
         return []
     if path == "wanted/missing":
         return {
