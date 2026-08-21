@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import contextlib
 from datetime import UTC, datetime, timedelta
 from typing import TYPE_CHECKING, Any
 
@@ -61,6 +60,10 @@ class StandardCoordinator(DataUpdateCoordinator[dict[str, Any]]):
             if app_type != "Bazarr":
                 data["system_status"] = await client.system.get_status()
 
+            # Bazarr and Dispatcharr expose no update endpoint.
+            if app_type not in ["Bazarr", "Dispatcharr"]:
+                data["update"] = await client.update.get()
+
             if app_type not in ["Bazarr", "Prowlarr", "Dispatcharr"]:
                 data["queue"] = await client.queue.get()
                 data["health"] = await client.system.get_health()
@@ -75,8 +78,18 @@ class StandardCoordinator(DataUpdateCoordinator[dict[str, Any]]):
                 )
 
             if app_type == "Bazarr":
-                with contextlib.suppress(Exception):
+                # Bazarr behind a URL base can answer with the web UI's HTML
+                # rather than JSON. That leaves connectivity off, which is
+                # correct, but it must not pass silently.
+                try:
                     data["system_status"] = await client.system.get_status()
+                except Exception as exception:  # noqa: BLE001
+                    LOGGER.warning(
+                        "Could not read Bazarr system status from %s: %s. "
+                        "Check the configured URL includes any URL base.",
+                        self.config_entry.data["url"],
+                        exception,
+                    )
 
             if app_type == "Prowlarr":
                 data["indexer_status"] = await client.indexer.get()

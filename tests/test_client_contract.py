@@ -97,9 +97,11 @@ def _expected_paths(app_type: str) -> list[str]:
         paths += DAILY_PATHS[app_type]
         # Buttons and service handlers.
         paths += ["system.request_restart", "backup.create", "command.execute"]
+        paths += ["update.get"]
     elif app_type == "Prowlarr":
         paths += ["indexer.get", "indexer.get_stats"]
         paths += ["system.request_restart", "backup.create", "command.execute"]
+        paths += ["update.get"]
     elif app_type == "Bazarr":
         # The Search Missing Subtitles button, which 6.8.0 moved off `command`.
         paths += ["series.run_action", "movies.run_action"]
@@ -153,6 +155,9 @@ def test_client_exposes_every_path_the_integration_uses(app_type: str) -> None:
         ("Dispatcharr", "queue"),
         ("Dispatcharr", "root_folder"),
         ("Dispatcharr", "quality_profile"),
+        # No update endpoint, so update_available cannot be offered for these.
+        ("Bazarr", "update"),
+        ("Dispatcharr", "update"),
     ],
 )
 def test_component_absent_so_callers_must_stay_guarded(
