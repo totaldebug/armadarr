@@ -31,7 +31,7 @@ from pyarr import (
 )
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
-from custom_components.armadarr.button import async_setup_entry
+from custom_components.armadarr.button import ArmadarrButton, async_setup_entry
 from custom_components.armadarr.const import (
     CONF_API_KEY,
     CONF_APP_TYPE,
@@ -41,7 +41,9 @@ from custom_components.armadarr.const import (
 )
 
 if TYPE_CHECKING:
-    from custom_components.armadarr.button import ArmadarrButton
+    from collections.abc import Iterable
+
+    from homeassistant.helpers.entity import Entity
 
 CLIENTS = {
     "Sonarr": AsyncSonarr,
@@ -93,7 +95,13 @@ async def _build_buttons(
     entry.runtime_data = runtime_data
 
     added: list[ArmadarrButton] = []
-    await async_setup_entry(hass, entry, added.extend)
+
+    # The signature, boolean default included, is fixed by AddEntitiesCallback.
+    def _add(new_entities: Iterable[Entity], update_before_add: bool = False) -> None:  # noqa: FBT002
+        """Stand in for AddEntitiesCallback, collecting what the platform adds."""
+        added.extend(e for e in new_entities if isinstance(e, ArmadarrButton))
+
+    await async_setup_entry(hass, entry, _add)
     return added, client
 
 

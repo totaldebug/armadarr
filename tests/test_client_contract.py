@@ -209,7 +209,7 @@ def test_whisparr_is_movie_based_not_series_based() -> None:
 
 def test_lidarr_has_no_metadata_profile_component() -> None:
     """
-    pyarr exposes metadata profiles for Readarr only, not Lidarr.
+    Pyarr exposes metadata profiles for Readarr only, not Lidarr.
 
     Lidarr's `metadata` component is metadata consumers - the nfo writers - and
     not the metadata profiles that add_artist's metadata_profile_id refers to.

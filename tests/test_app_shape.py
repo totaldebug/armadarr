@@ -20,6 +20,10 @@ from custom_components.armadarr.parsers import parse_event
 from custom_components.armadarr.sensor_descriptions import get_app_specific_sensors
 from custom_components.armadarr.services import async_setup_services
 
+# Sample values for the parsed-event test, named so the assertions read clearly.
+SAMPLE_RUNTIME = 42
+SAMPLE_RATING = 8.5
+
 
 def test_whisparr_gets_the_same_sensors_as_radarr() -> None:
     """Whisparr reports movies, so its sensor set must match Radarr's."""
@@ -75,9 +79,9 @@ def test_whisparr_events_parse_as_movies() -> None:
         "title": "A Scene",
         "releaseDate": "2026-08-21T00:00:00Z",
         "studio": "A Studio",
-        "runtime": 42,
+        "runtime": SAMPLE_RUNTIME,
         "genres": ["One", "Two"],
-        "ratings": {"value": 8.5},
+        "ratings": {"value": SAMPLE_RATING},
         "images": [{"coverType": "poster", "remoteUrl": "http://img/poster.jpg"}],
     }
 
@@ -86,9 +90,9 @@ def test_whisparr_events_parse_as_movies() -> None:
     assert item is not None
     assert item["title"] == "A Scene"
     assert item["studio"] == "A Studio"
-    assert item["runtime"] == 42
+    assert item["runtime"] == SAMPLE_RUNTIME
     assert item["genres"] == "One, Two"
-    assert item["rating"] == 8.5
+    assert item["rating"] == SAMPLE_RATING
     assert item["poster"] == "http://img/poster.jpg"
     # Sonarr-only episode numbering must not appear.
     assert "number" not in item
