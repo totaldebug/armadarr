@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.0.0](https://github.com/totaldebug/armadarr/compare/v0.3.1...v1.0.0) (2026-08-21)
+
+
+### ⚠ BREAKING CHANGES
+
+* **deps:** Whisparr now reports movie_count instead of series_count and registers add_movie and lookup_movie instead of add_series and lookup_series. The old Whisparr daily sensors never populated, but their entities will be orphaned and any automation referencing them needs updating.
+
+### Features
+
+* **deps:** upgrade pyarr to 6.8.0 and fix per-app component breakage ([6acb67b](https://github.com/totaldebug/armadarr/commit/6acb67b361d15e01fa2fd94a4f681d82adf00396))
+* **deps:** upgrade pyarr to 6.8.0 and fix per-app component breakage ([94bf0f7](https://github.com/totaldebug/armadarr/commit/94bf0f7c93da732c4bb75f785704ab6d3fa67f59))
+
 ## [0.3.1](https://github.com/totaldebug/armadarr/compare/v0.3.0...v0.3.1) (2026-07-22)
 
 
