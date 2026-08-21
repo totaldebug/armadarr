@@ -11,5 +11,5 @@
   "requirements": [
     "pyarr>=6.8.0"
   ],
-  "version": "0.3.1"
+  "version": "0.4.0"
 }
