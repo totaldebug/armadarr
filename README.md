@@ -99,6 +99,7 @@ For the best results, it is recommended to use the [Armadarr Card](https://githu
 - **Binary Sensors**:
   - **Connectivity**: Monitor if the application is reachable.
   - **Update Available**: Alerts when a new version of the application is available.
+    Sourced from the application's update endpoint, so not offered for Bazarr or Dispatcharr, which do not have one.
 - **Buttons**:
   - **Restart Application**: Remotely restart the service. Not offered for Dispatcharr, which has no restart endpoint.
   - **Backup Now**: Trigger an immediate system backup. Not offered for Bazarr, which has no backup endpoint.
@@ -160,6 +161,8 @@ Armadarr provides several services to control your applications. Services are co
 
 ### Media Management Services
 These services allow you to add new content to your library. If an ID is not provided, the integration will attempt to look up the item by title. If multiple matches are found, an error will be raised listing the options.
+
+Services check the app type of the entry they are given, so calling one against the wrong instance - `add_series` on a Radarr entry, for example - fails with a message naming the mismatch rather than an internal error.
 
 - **`armadarr.add_series`**: Add a new series to Sonarr.
 - **`armadarr.add_movie`**: Add a new movie to Radarr or Whisparr.
