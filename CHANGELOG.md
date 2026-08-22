@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.4.1](https://github.com/totaldebug/armadarr/compare/v0.4.0...v0.4.1) (2026-08-21)
+
+
+### Bug Fixes
+
+* **binary_sensor:** derive update_available from the update endpoint ([fe7918d](https://github.com/totaldebug/armadarr/commit/fe7918db8087c4c42c1f90f63d4da03b2095b56c))
+* correct update_available sensor and validate service app types ([0d0b710](https://github.com/totaldebug/armadarr/commit/0d0b7107871d21fe97929c88046c618799851641))
+* **services:** reject config entries a service cannot serve ([f52509a](https://github.com/totaldebug/armadarr/commit/f52509ae7abd89a08cd1b03be48e37f994671c97))
+
+
+### Documentation
+
+* note the update sensor's source and service app-type checks ([f3c7ae2](https://github.com/totaldebug/armadarr/commit/f3c7ae2f6edb3f555c20c7df3774fd64827f6cd8))
+
 ## [0.4.0](https://github.com/totaldebug/armadarr/compare/v0.3.1...v0.4.0) (2026-08-21)
 
 
