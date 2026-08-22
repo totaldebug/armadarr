@@ -184,7 +184,7 @@ These services return the raw search results from the application, useful for fi
 
 Ready-made [Home Assistant script blueprints](blueprints/README.md) let you search for and add media to Sonarr, Radarr, Lidarr, and Readarr straight from a dashboard, building on the lookup and add services above.
 Quality profiles and root folders are populated dynamically from each instance, so there are no IDs to hardcode.
-Metadata profiles are populated for Readarr only, because pyarr does not yet expose Lidarr's metadata profiles - Lidarr's `metadata_profile_id` has to be supplied by hand.
+Metadata profiles are populated for Lidarr and Readarr, the two apps that have them.
 
 Import a blueprint via **Settings** > **Automations & scenes** > **Blueprints** > **Import Blueprint** using its raw URL, for example:
 

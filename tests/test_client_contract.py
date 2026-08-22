@@ -75,7 +75,13 @@ DISPATCHARR_PATHS = [
 DAILY_PATHS = {
     "Sonarr": ["series.get", "series.add", "series.lookup", "wanted.get"],
     "Radarr": ["movie.get", "movie.add", "movie.lookup", "wanted.get"],
-    "Lidarr": ["artist.get", "artist.add", "artist.lookup", "wanted.get"],
+    "Lidarr": [
+        "artist.get",
+        "artist.add",
+        "artist.lookup",
+        "wanted.get",
+        "metadata_profile.get",
+    ],
     "Readarr": [
         "author.get",
         "author.add",
@@ -212,22 +218,35 @@ def test_whisparr_is_movie_based_not_series_based() -> None:
     assert hasattr(client, "movie")
 
 
-def test_lidarr_has_no_metadata_profile_component() -> None:
+def test_lidarr_and_readarr_both_serve_metadata_profiles() -> None:
     """
-    Pyarr exposes metadata profiles for Readarr only, not Lidarr.
+    Both Lidarr and Readarr expose metadata profiles, added for Lidarr in 6.9.0.
 
-    Lidarr's `metadata` component is metadata consumers - the nfo writers - and
-    not the metadata profiles that add_artist's metadata_profile_id refers to.
-    The get_config_data service used to ask Lidarr for `metadata_profile`, which
-    raised AttributeError and failed the whole call.
+    get_config_data previously restricted this to Readarr because pyarr had no
+    Lidarr binding, which left add_artist's required metadata_profile_id with no
+    way to be discovered. pyarr 6.9.0 added it, verified against a live Lidarr.
 
-    Lidarr's own API does serve /api/v1/metadataprofile, so this is a gap in
-    pyarr rather than something Lidarr cannot do. Until pyarr covers it,
-    get_config_data returns metadata profiles for Readarr alone.
+    The two are separate resources sharing an endpoint name: Lidarr's profile
+    carries album types and release statuses, Readarr's carries book fields, so
+    only Lidarr's exposes a schema endpoint.
     """
-    client = AsyncLidarr("http://localhost", "test-api-key")
+    lidarr = AsyncLidarr("http://localhost", "test-api-key")
+    readarr = AsyncReadarr("http://localhost", "test-api-key")
 
-    assert not hasattr(client, "metadata_profile")
-    # The similarly-named component that does exist, and is not a substitute.
-    assert hasattr(client, "metadata")
-    assert hasattr(AsyncReadarr("http://localhost", "k"), "metadata_profile")
+    assert hasattr(lidarr.metadata_profile, "get")
+    assert hasattr(readarr.metadata_profile, "get")
+    assert hasattr(lidarr.metadata_profile, "get_schema")
+    assert not hasattr(readarr.metadata_profile, "get_schema")
+
+    # `metadata` is the nfo-writer consumer settings, not a profile. It is a
+    # separate component and offers none of the profile management methods,
+    # which is why it was never a substitute for metadata_profile.
+    assert hasattr(lidarr, "metadata")
+    for method in ("get_schema", "add", "update", "delete"):
+        assert not hasattr(lidarr.metadata, method)
+
+
+@pytest.mark.parametrize("app_type", ["Sonarr", "Radarr", "Whisparr", "Prowlarr"])
+def test_metadata_profile_absent_where_unsupported(app_type: str) -> None:
+    """Only Lidarr and Readarr have metadata profiles; the guard must stay narrow."""
+    assert not hasattr(CLIENTS[app_type]("http://localhost", "k"), "metadata_profile")
