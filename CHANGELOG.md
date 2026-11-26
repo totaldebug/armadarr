@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.5.0](https://github.com/totaldebug/armadarr/compare/v0.4.1...v0.5.0) (2026-11-26)
+
+
+### Features
+
+* **lidarr:** return metadata profiles from get_config_data ([9ad2d78](https://github.com/totaldebug/armadarr/commit/9ad2d780482c560f579972a18e01368542702ce4))
+* **lidarr:** return metadata profiles from get_config_data ([176f611](https://github.com/totaldebug/armadarr/commit/176f6111f77f55a3f7a9be44da7a9cdb02311d25))
+
 ## [0.4.1](https://github.com/totaldebug/armadarr/compare/v0.4.0...v0.4.1) (2026-08-21)
 
 
