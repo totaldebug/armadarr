@@ -21,7 +21,7 @@ repos:
         additional_dependencies:
           - pytest
           - homeassistant
-          - pyarr==6.8.0
+          - pyarr==6.9.0
   - repo: https://github.com/codespell-project/codespell
     rev: v2.4.3
     hooks:

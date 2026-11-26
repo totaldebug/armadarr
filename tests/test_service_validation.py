@@ -13,8 +13,10 @@ ArmadarrServiceError naming the mismatch instead.
 
 from __future__ import annotations
 
+from unittest.mock import AsyncMock
+
 import pytest
-from homeassistant.core import HomeAssistant
+from homeassistant.core import HomeAssistant, ServiceCall
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.armadarr.const import (
@@ -30,6 +32,7 @@ from custom_components.armadarr.services.handlers import (
     SERIES_APPS,
     ArmadarrServiceError,
     async_get_client,
+    async_handle_get_config_data,
 )
 
 
@@ -139,3 +142,48 @@ def test_app_groups_are_consistent() -> None:
     """
     for group in (SERIES_APPS, MOVIE_APPS):
         assert set(group) <= set(MEDIA_APPS)
+
+
+@pytest.mark.parametrize("app_type", ["Lidarr", "Readarr"])
+async def test_get_config_data_returns_metadata_profiles(
+    hass: HomeAssistant, app_type: str
+) -> None:
+    """
+    Lidarr and Readarr both report metadata profiles.
+
+    Lidarr was excluded because pyarr had no binding for its metadataprofile
+    endpoint, so add_artist's required metadata_profile_id could not be
+    discovered through the integration. pyarr 6.9.0 added it.
+    """
+    entry = _entry(hass, app_type)
+    client = AsyncMock()
+    client.root_folder.get = AsyncMock(return_value=[{"id": 1, "path": "/media"}])
+    client.quality_profile.get = AsyncMock(return_value=[{"id": 1, "name": "Any"}])
+    client.metadata_profile.get = AsyncMock(
+        return_value=[{"id": 1, "name": "Standard"}]
+    )
+    entry.runtime_data.client = client
+
+    call = ServiceCall(hass, DOMAIN, "get_config_data", {"entry_id": entry.entry_id})
+    result = await async_handle_get_config_data(hass, call)
+
+    assert result["data"]["metadata_profiles"] == [{"id": 1, "name": "Standard"}]
+    client.metadata_profile.get.assert_awaited_once()
+
+
+@pytest.mark.parametrize("app_type", ["Sonarr", "Radarr", "Whisparr"])
+async def test_get_config_data_skips_metadata_profiles_elsewhere(
+    hass: HomeAssistant, app_type: str
+) -> None:
+    """Apps without metadata profiles must not be asked for them."""
+    entry = _entry(hass, app_type)
+    client = AsyncMock()
+    client.root_folder.get = AsyncMock(return_value=[])
+    client.quality_profile.get = AsyncMock(return_value=[])
+    entry.runtime_data.client = client
+
+    call = ServiceCall(hass, DOMAIN, "get_config_data", {"entry_id": entry.entry_id})
+    result = await async_handle_get_config_data(hass, call)
+
+    assert "metadata_profiles" not in result["data"]
+    client.metadata_profile.get.assert_not_awaited()

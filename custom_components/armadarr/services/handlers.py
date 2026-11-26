@@ -311,7 +311,7 @@ async def async_handle_get_config_data(
         data["root_folders"] = await client.root_folder.get()
         data["quality_profiles"] = await client.quality_profile.get()
 
-    if app_type == "Readarr":
+    if app_type in ["Lidarr", "Readarr"]:
         data["metadata_profiles"] = await client.metadata_profile.get()
 
     return {"data": data}
